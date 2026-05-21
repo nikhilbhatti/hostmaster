@@ -1,0 +1,2 @@
+<?php namespace App\Models; use CodeIgniter\Model;
+class QuoteItemModel extends Model { protected $table='quote_items'; protected $allowedFields=['quote_id','item_id','item_name','description','qty','unit','rate','discount','tax_id','tax_rate','tax_amount','amount']; protected $returnType='array'; }

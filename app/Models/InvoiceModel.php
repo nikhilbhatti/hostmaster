@@ -1,0 +1,2 @@
+<?php namespace App\Models; use CodeIgniter\Model;
+class InvoiceModel extends Model { protected $table='invoices'; protected $allowedFields=['invoice_number','quote_id','customer_id','reference','invoice_date','due_date','payment_terms','subject','status','sub_total','discount_type','discount_value','discount_amount','tax_total','total','balance_due','paid_amount','customer_notes','terms']; protected $returnType='array'; }

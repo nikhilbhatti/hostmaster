@@ -1,0 +1,227 @@
+DEBUG - 2026-04-13 17:13:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-04-13 17:13:51 --> Error connecting to the database: mysqli_sql_exception: No connection could be made because the target machine actively refused it in C:\wamp64\www\HostMaster\system\Database\MySQLi\Connection.php:201
+Stack trace:
+#0 C:\wamp64\www\HostMaster\system\Database\MySQLi\Connection.php(201): mysqli->real_connect('localhost', 'root', Object(SensitiveParameterValue), 'hostmaster_db', 3306, '', 0)
+#1 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(419): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#2 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(614): CodeIgniter\Database\BaseConnection->initialize()
+#3 C:\wamp64\www\HostMaster\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `orders`...', Array, false)
+#4 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(86): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(25): App\Controllers\BaseController->checkDomainExpiries()
+#6 C:\wamp64\www\HostMaster\system\CodeIgniter.php(904): App\Controllers\BaseController->initController(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), Object(CodeIgniter\Log\Logger))
+#7 C:\wamp64\www\HostMaster\system\CodeIgniter.php(498): CodeIgniter\CodeIgniter->createController()
+#8 C:\wamp64\www\HostMaster\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\wamp64\www\HostMaster\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\wamp64\www\HostMaster\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\wamp64\www\HostMaster\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 C:\wamp64\www\HostMaster\system\rewrite.php(44): require_once('C:\\wamp64\\www\\H...')
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: No connection could be made because the target machine actively refused it in C:\wamp64\www\HostMaster\system\Database\MySQLi\Connection.php:246
+Stack trace:
+#0 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(419): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#1 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(614): CodeIgniter\Database\BaseConnection->initialize()
+#2 C:\wamp64\www\HostMaster\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `orders`...', Array, false)
+#3 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(86): CodeIgniter\Database\BaseBuilder->get()
+#4 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(25): App\Controllers\BaseController->checkDomainExpiries()
+#5 C:\wamp64\www\HostMaster\system\CodeIgniter.php(904): App\Controllers\BaseController->initController(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), Object(CodeIgniter\Log\Logger))
+#6 C:\wamp64\www\HostMaster\system\CodeIgniter.php(498): CodeIgniter\CodeIgniter->createController()
+#7 C:\wamp64\www\HostMaster\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#8 C:\wamp64\www\HostMaster\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#9 C:\wamp64\www\HostMaster\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#10 C:\wamp64\www\HostMaster\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#11 C:\wamp64\www\HostMaster\system\rewrite.php(44): require_once('C:\\wamp64\\www\\H...')
+#12 {main}
+CRITICAL - 2026-04-13 17:13:51 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: No connection could be made because the target machine actively refused it
+[Method: GET, Route: /]
+in SYSTEMPATH\Database\BaseConnection.php on line 465.
+ 1 SYSTEMPATH\Database\BaseConnection.php(614): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `orders`.`id`, `orders`.`domain_name`, `orders`.`client_id`, `orders`.`domain_expiry_date`, `clients`.`client_name`
+FROM `orders`
+JOIN `clients` ON `clients`.`id` = `orders`.`client_id`
+WHERE `domain_expiry_date` <= :domain_expiry_date:
+AND `domain_expiry_date` >= :domain_expiry_date.1:', [...], false)
+ 3 APPPATH\Controllers\BaseController.php(86): CodeIgniter\Database\BaseBuilder->get()
+ 4 APPPATH\Controllers\BaseController.php(25): App\Controllers\BaseController->checkDomainExpiries()
+ 5 SYSTEMPATH\CodeIgniter.php(904): App\Controllers\BaseController->initController(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), Object(CodeIgniter\Log\Logger))
+ 6 SYSTEMPATH\CodeIgniter.php(498): CodeIgniter\CodeIgniter->createController()
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+11 SYSTEMPATH\rewrite.php(44): require_once('C:\\wamp64\\www\\HostMaster\\public\\index.php')
+DEBUG - 2026-04-13 17:13:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-04-13 17:13:55 --> Error connecting to the database: mysqli_sql_exception: No connection could be made because the target machine actively refused it in C:\wamp64\www\HostMaster\system\Database\MySQLi\Connection.php:201
+Stack trace:
+#0 C:\wamp64\www\HostMaster\system\Database\MySQLi\Connection.php(201): mysqli->real_connect('localhost', 'root', Object(SensitiveParameterValue), 'hostmaster_db', 3306, '', 0)
+#1 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(419): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#2 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(614): CodeIgniter\Database\BaseConnection->initialize()
+#3 C:\wamp64\www\HostMaster\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `orders`...', Array, false)
+#4 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(86): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(25): App\Controllers\BaseController->checkDomainExpiries()
+#6 C:\wamp64\www\HostMaster\system\CodeIgniter.php(904): App\Controllers\BaseController->initController(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), Object(CodeIgniter\Log\Logger))
+#7 C:\wamp64\www\HostMaster\system\CodeIgniter.php(498): CodeIgniter\CodeIgniter->createController()
+#8 C:\wamp64\www\HostMaster\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\wamp64\www\HostMaster\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\wamp64\www\HostMaster\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\wamp64\www\HostMaster\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 C:\wamp64\www\HostMaster\system\rewrite.php(44): require_once('C:\\wamp64\\www\\H...')
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: No connection could be made because the target machine actively refused it in C:\wamp64\www\HostMaster\system\Database\MySQLi\Connection.php:246
+Stack trace:
+#0 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(419): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#1 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(614): CodeIgniter\Database\BaseConnection->initialize()
+#2 C:\wamp64\www\HostMaster\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `orders`...', Array, false)
+#3 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(86): CodeIgniter\Database\BaseBuilder->get()
+#4 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(25): App\Controllers\BaseController->checkDomainExpiries()
+#5 C:\wamp64\www\HostMaster\system\CodeIgniter.php(904): App\Controllers\BaseController->initController(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), Object(CodeIgniter\Log\Logger))
+#6 C:\wamp64\www\HostMaster\system\CodeIgniter.php(498): CodeIgniter\CodeIgniter->createController()
+#7 C:\wamp64\www\HostMaster\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#8 C:\wamp64\www\HostMaster\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#9 C:\wamp64\www\HostMaster\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#10 C:\wamp64\www\HostMaster\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#11 C:\wamp64\www\HostMaster\system\rewrite.php(44): require_once('C:\\wamp64\\www\\H...')
+#12 {main}
+CRITICAL - 2026-04-13 17:13:55 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: No connection could be made because the target machine actively refused it
+[Method: GET, Route: /]
+in SYSTEMPATH\Database\BaseConnection.php on line 465.
+ 1 SYSTEMPATH\Database\BaseConnection.php(614): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `orders`.`id`, `orders`.`domain_name`, `orders`.`client_id`, `orders`.`domain_expiry_date`, `clients`.`client_name`
+FROM `orders`
+JOIN `clients` ON `clients`.`id` = `orders`.`client_id`
+WHERE `domain_expiry_date` <= :domain_expiry_date:
+AND `domain_expiry_date` >= :domain_expiry_date.1:', [...], false)
+ 3 APPPATH\Controllers\BaseController.php(86): CodeIgniter\Database\BaseBuilder->get()
+ 4 APPPATH\Controllers\BaseController.php(25): App\Controllers\BaseController->checkDomainExpiries()
+ 5 SYSTEMPATH\CodeIgniter.php(904): App\Controllers\BaseController->initController(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), Object(CodeIgniter\Log\Logger))
+ 6 SYSTEMPATH\CodeIgniter.php(498): CodeIgniter\CodeIgniter->createController()
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+11 SYSTEMPATH\rewrite.php(44): require_once('C:\\wamp64\\www\\HostMaster\\public\\index.php')
+DEBUG - 2026-04-13 17:17:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-04-13 17:17:28 --> Error connecting to the database: mysqli_sql_exception: No connection could be made because the target machine actively refused it in C:\wamp64\www\HostMaster\system\Database\MySQLi\Connection.php:201
+Stack trace:
+#0 C:\wamp64\www\HostMaster\system\Database\MySQLi\Connection.php(201): mysqli->real_connect('localhost', 'root', Object(SensitiveParameterValue), 'hostmaster_db', 3306, '', 0)
+#1 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(419): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#2 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(614): CodeIgniter\Database\BaseConnection->initialize()
+#3 C:\wamp64\www\HostMaster\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `orders`...', Array, false)
+#4 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(86): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(25): App\Controllers\BaseController->checkDomainExpiries()
+#6 C:\wamp64\www\HostMaster\system\CodeIgniter.php(904): App\Controllers\BaseController->initController(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), Object(CodeIgniter\Log\Logger))
+#7 C:\wamp64\www\HostMaster\system\CodeIgniter.php(498): CodeIgniter\CodeIgniter->createController()
+#8 C:\wamp64\www\HostMaster\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\wamp64\www\HostMaster\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\wamp64\www\HostMaster\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\wamp64\www\HostMaster\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 C:\wamp64\www\HostMaster\system\rewrite.php(44): require_once('C:\\wamp64\\www\\H...')
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: No connection could be made because the target machine actively refused it in C:\wamp64\www\HostMaster\system\Database\MySQLi\Connection.php:246
+Stack trace:
+#0 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(419): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#1 C:\wamp64\www\HostMaster\system\Database\BaseConnection.php(614): CodeIgniter\Database\BaseConnection->initialize()
+#2 C:\wamp64\www\HostMaster\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `orders`...', Array, false)
+#3 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(86): CodeIgniter\Database\BaseBuilder->get()
+#4 C:\wamp64\www\HostMaster\app\Controllers\BaseController.php(25): App\Controllers\BaseController->checkDomainExpiries()
+#5 C:\wamp64\www\HostMaster\system\CodeIgniter.php(904): App\Controllers\BaseController->initController(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), Object(CodeIgniter\Log\Logger))
+#6 C:\wamp64\www\HostMaster\system\CodeIgniter.php(498): CodeIgniter\CodeIgniter->createController()
+#7 C:\wamp64\www\HostMaster\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#8 C:\wamp64\www\HostMaster\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#9 C:\wamp64\www\HostMaster\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#10 C:\wamp64\www\HostMaster\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#11 C:\wamp64\www\HostMaster\system\rewrite.php(44): require_once('C:\\wamp64\\www\\H...')
+#12 {main}
+CRITICAL - 2026-04-13 17:17:28 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: No connection could be made because the target machine actively refused it
+[Method: GET, Route: /]
+in SYSTEMPATH\Database\BaseConnection.php on line 465.
+ 1 SYSTEMPATH\Database\BaseConnection.php(614): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `orders`.`id`, `orders`.`domain_name`, `orders`.`client_id`, `orders`.`domain_expiry_date`, `clients`.`client_name`
+FROM `orders`
+JOIN `clients` ON `clients`.`id` = `orders`.`client_id`
+WHERE `domain_expiry_date` <= :domain_expiry_date:
+AND `domain_expiry_date` >= :domain_expiry_date.1:', [...], false)
+ 3 APPPATH\Controllers\BaseController.php(86): CodeIgniter\Database\BaseBuilder->get()
+ 4 APPPATH\Controllers\BaseController.php(25): App\Controllers\BaseController->checkDomainExpiries()
+ 5 SYSTEMPATH\CodeIgniter.php(904): App\Controllers\BaseController->initController(Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), Object(CodeIgniter\Log\Logger))
+ 6 SYSTEMPATH\CodeIgniter.php(498): CodeIgniter\CodeIgniter->createController()
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+11 SYSTEMPATH\rewrite.php(44): require_once('C:\\wamp64\\www\\HostMaster\\public\\index.php')
+DEBUG - 2026-04-13 17:18:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:18:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:18:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:24:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:24:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:24:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:24:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:24:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:36:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:36:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:36:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:37:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:37:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:37:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:37:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:37:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:37:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:37:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:37:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:37:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:38:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:39:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:39:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:39:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:42:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:44:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:44:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:44:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:44:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:45:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:51:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:51:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:51:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:51:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:51:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:52:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:55:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:55:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:55:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:55:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:56:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:57:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:57:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:57:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:57:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:57:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:57:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-04-13 17:57:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.

@@ -1,0 +1,2 @@
+<?php namespace App\Models; use CodeIgniter\Model;
+class QuoteModel extends Model { protected $table='quotes'; protected $allowedFields=['quote_number','customer_id','reference','quote_date','expiry_date','subject','status','sub_total','discount_type','discount_value','discount_amount','tax_total','total','customer_notes','terms']; protected $returnType='array'; }
