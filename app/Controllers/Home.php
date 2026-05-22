@@ -289,6 +289,6 @@ public function index()
             ->join('admins', 'admins.id = daily_reports.staff_id', 'left')
             ->orderBy('daily_reports.created_at', 'DESC')->get()->getResultArray(); 
         $data['user_role'] = session()->get('user_role');
-        return view('reports/index', $data);
+        return view('reports/index', $data);// Testing live SFTP sync bypass
     }
 }// Final sync test checking sftp connection
