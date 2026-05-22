@@ -282,13 +282,13 @@ public function index()
         return redirect()->to('dashboard')->with('status', 'All read!');
     }
 
-    public function allReports() {// Testing my new macro command
+    public function allReports() {
         $db = \Config\Database::connect();
         $data['daily_reports'] = $db->table('daily_reports')
             ->select('daily_reports.*, admins.name as staff_name') 
             ->join('admins', 'admins.id = daily_reports.staff_id', 'left')
             ->orderBy('daily_reports.created_at', 'DESC')->get()->getResultArray(); 
         $data['user_role'] = session()->get('user_role');
-        return view('reports/index', $data);// Testing live SFTP sync bypass
+        return view('reports/index', $data);
     }
-}// Final sync test checking sftp connection
+}
