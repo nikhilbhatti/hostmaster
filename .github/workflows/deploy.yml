@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Sync to Hostinger Live Server
+      - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
 
         with:
@@ -21,20 +21,20 @@ jobs:
           username: u477483561
           password: ${{ secrets.FTP_PASSWORD }}
 
-          local-dir: ./
-
-          server-dir: /public_html/master/
-
           protocol: ftp
           port: 21
 
-          timeout: 600000
+          local-dir: ./
+          server-dir: /public_html/master/
+
+          dangerous-clean-slate: false
 
           exclude: |
             **/.git*
-            **/.git*/**
             **/.github/**
             **/.vscode/**
-            **/.env
-            **/writable/**
+            **/node_modules/**
             **/tests/**
+            **/vendor/**
+            **/writable/**
+            **/.env
