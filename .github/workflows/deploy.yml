@@ -20,6 +20,9 @@ jobs:
           server-dir: /domains/slysis.com/public_html/master/
           state-name: .ftp-deploy-sync-state.json
           dry-run: false
+          passive: true
+          debug: true
+          timeout: 300000 # 5 minute ka timeout
           exclude: |
             **/.git*
             **/.git*/**
