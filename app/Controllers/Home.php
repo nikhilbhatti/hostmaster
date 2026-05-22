@@ -291,4 +291,4 @@ public function index()
         $data['user_role'] = session()->get('user_role');
         return view('reports/index', $data);
     }
-}// Testing my new macro command
+}// Final sync test checking sftp connection
