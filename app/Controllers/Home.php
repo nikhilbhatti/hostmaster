@@ -282,7 +282,7 @@ public function index()
         return redirect()->to('dashboard')->with('status', 'All read!');
     }
 
-    public function allReports() {
+    public function allReports() {// Testing my new macro command
         $db = \Config\Database::connect();
         $data['daily_reports'] = $db->table('daily_reports')
             ->select('daily_reports.*, admins.name as staff_name') 
