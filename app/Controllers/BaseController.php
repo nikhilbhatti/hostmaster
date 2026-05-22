@@ -230,7 +230,7 @@ abstract class BaseController extends Controller
         'type'          => 'staff',     // Enum type set karein
         'is_read'       => 0,
         'link'          => $link,
-        'is_admin_only' => $is_admin,   // Admin ke liye 1, staff ke liye 0
+        'is_admin_only' => $is_admin,   // Admin ke liye 1,
         'created_at'    => date('Y-m-d H:i:s')
     ];
     return $db->table('notifications')->insert($data);
