@@ -1,4 +1,5 @@
 name: Live Deploy
+
 on:
   push:
     branches:
@@ -7,25 +8,33 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Sync to Hostinger Live Server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+
         with:
           server: 82.112.232.206
           username: u477483561
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /domains/slysis.com/public_html/master/
-          # Yeh command scanning ko fast karti hai
-          state-name: .ftp-deploy-sync-state.json
-          # Timeout 10 minute tak badha diya
-          timeout: 600000 
+
+          local-dir: ./
+
+          server-dir: /public_html/master/
+
+          protocol: ftp
+          port: 21
+
+          timeout: 600000
+
           exclude: |
             **/.git*
             **/.git*/**
+            **/.github/**
             **/.vscode/**
-            **/app/Config/Database.php
             **/.env
             **/writable/**
+            **/tests/**
