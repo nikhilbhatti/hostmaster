@@ -18,6 +18,8 @@ jobs:
           username: u477483561
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /domains/slysis.com/public_html/master/
+          state-name: .ftp-deploy-sync-state.json
+          dry-run: false
           exclude: |
             **/.git*
             **/.git*/**
@@ -25,7 +27,3 @@ jobs:
             **/app/Config/Database.php
             **/.env
             **/writable/**
-            **/writable/debugbar/**
-            **/writable/session/**
-            **/writable/logs/**
-            **/writable/cache/**
