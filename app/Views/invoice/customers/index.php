@@ -199,6 +199,7 @@
             </tbody>
         </table>
     </div>
+    
 </div>
 
 <?= $this->endSection() ?>
