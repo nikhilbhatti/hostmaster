@@ -1,0 +1,10 @@
+vendor/
+system/
+node_modules/
+.git/
+.github/
+tests/
+writable/logs/
+writable/cache/
+*.log
+.env
