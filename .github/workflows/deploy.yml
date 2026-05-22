@@ -20,10 +20,11 @@ jobs:
           server: 82.112.232.206
           username: u477483561
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps
           port: 21
           local-dir: ./
           server-dir: /public_html/master/
+          force-upload: true
           dangerous-clean-slate: false
           exclude: |
             **/.git/**
