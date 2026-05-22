@@ -16,7 +16,7 @@ jobs:
         with:
           server: 82.112.232.206
           username: u477483561
-          password: SlysisMaster@2026
+          password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /domains/slysis.com/public_html/master/
           exclude: |
             **/.git*
