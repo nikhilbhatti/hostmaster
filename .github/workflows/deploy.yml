@@ -25,7 +25,7 @@ jobs:
           local-dir: ./
           server-dir: /public_html/master/
           force-upload: true
-          dangerous-clean-slate: false
+          dangerous-clean-slate: true
           exclude: |
             **/.git/**
             **/.git*
