@@ -8,33 +8,32 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-
         with:
           server: 82.112.232.206
           username: u477483561
           password: ${{ secrets.FTP_PASSWORD }}
-
           protocol: ftp
           port: 21
-
           local-dir: ./
           server-dir: /public_html/master/
-
           dangerous-clean-slate: false
-
           exclude: |
+            **/.git/**
             **/.git*
             **/.github/**
             **/.vscode/**
             **/node_modules/**
             **/tests/**
             **/vendor/**
+            **/system/**
             **/writable/**
             **/.env
+            **/*.log
