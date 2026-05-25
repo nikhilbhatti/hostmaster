@@ -23,6 +23,7 @@ jobs:
           port: 21
           local-dir: ./
           server-dir: /public_html/master/
+          state-name: .ftp-deploy-sync-state.json
           dangerous-clean-slate: false
           exclude: |
             **/.git/**
