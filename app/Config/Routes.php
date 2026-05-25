@@ -355,7 +355,7 @@ $routes->group('invoice', ['namespace' => 'App\Controllers\Invoice'], function($
     $routes->post('invoices/update/(:num)', 'Invoices::update/$1');
 
     $routes->get('invoices/delete/(:num)', 'Invoices::delete/$1');
-
+$routes->post('items/ajax-store', 'Items::ajaxStore');
 
     /*
     |--------------------------------------------------------------------------

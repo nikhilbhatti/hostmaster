@@ -1,9 +1,10 @@
+
 <?= $this->extend('layout/main') ?>
 <?php $page_title = $invoice ? 'Edit Invoice' : 'New Invoice'; ?>
 <?= $this->section('content') ?>
 
 <style>
-/* ── Searchable Dropdown ── */
+/* ── Searchable Customer Dropdown ── */
 .cust-dropdown { position:relative; }
 .cust-dropdown .cd-input-wrap { display:flex; align-items:center; border:1.5px solid #5065e8; border-radius:6px; background:#fff; padding:0 10px; gap:8px; }
 .cust-dropdown .cd-input-wrap input { border:none; outline:none; font-size:14px; padding:9px 0; flex:1; color:#1a1f36; }
@@ -34,12 +35,20 @@
 .items-tbl th { background:#f8f9fc; padding:9px 12px; font-size:11px; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid #e8eaed; text-align:left; }
 .items-tbl td { padding:8px 10px; border-bottom:1px solid #f5f5f5; vertical-align:middle; }
 .items-tbl tbody tr:last-child td { border-bottom:none; }
-.items-tbl .item-sel { width:100%; border:none; outline:none; font-size:13px; background:transparent; color:#1a1f36; cursor:pointer; }
-.items-tbl .item-sel:focus { background:#f0f4ff; border-radius:4px; }
 .items-tbl input.num { width:100%; border:none; outline:none; font-size:13px; text-align:right; background:transparent; padding:2px 4px; }
 .items-tbl input.num:focus { background:#f0f4ff; border-radius:4px; }
 .items-tbl .row-amt { font-weight:600; font-size:13px; text-align:right; color:#1a1f36; }
 .items-tbl .desc-input { width:100%; border:none; outline:none; font-size:12px; color:#6b7280; background:transparent; margin-top:2px; padding:2px 0; }
+
+/* ── Item Searchable Dropdown ── */
+.item-dropdown { position:relative; }
+.item-dropdown .id-input { width:100%; border:1px solid #e8eaed; border-radius:6px; padding:6px 10px; font-size:13px; color:#1a1f36; background:#fff; outline:none; cursor:pointer; }
+.item-dropdown .id-input:focus { border-color:#5065e8; }
+.item-dropdown .id-list { display:none; position:absolute; top:calc(100% + 2px); left:0; min-width:260px; background:#fff; border:1px solid #e8eaed; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:1000; max-height:220px; overflow-y:auto; }
+.item-dropdown .id-list.open { display:block; }
+.item-dropdown .id-opt { padding:9px 14px; font-size:13px; color:#1a1f36; cursor:pointer; }
+.item-dropdown .id-opt:hover { background:#f0f4ff; }
+.item-dropdown .id-opt .id-opt-sub { font-size:11px; color:#9ca3af; margin-top:1px; }
 
 /* ── Totals ── */
 .totals-wrap { padding:16px 20px; }
@@ -49,6 +58,13 @@
 .totals-row.grand .tr { font-size:18px; font-weight:700; color:#1a1f36; }
 .tl { color:#6b7280; }
 .tr { font-weight:500; }
+
+/* ── Action Buttons ── */
+.inv-actions { display:flex; gap:10px; margin-bottom:40px; flex-wrap:wrap; }
+.btn-draft { background:#fff; color:#374151; border:1.5px solid #d1d5db; font-weight:600; }
+.btn-draft:hover { background:#f9fafb; }
+.btn-send { background:#5065e8; color:#fff; border:1.5px solid #5065e8; font-weight:600; }
+.btn-send:hover { background:#3d52d5; }
 </style>
 
 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
@@ -62,11 +78,15 @@
 <form method="POST" action="<?= base_url($invoice ? 'invoice/invoices/update/' . $invoice['id'] : 'invoice/invoices/store') ?>" id="invoiceForm">
 <?= csrf_field() ?>
 
+<!-- hidden field for action (draft/sent) -->
+<input type="hidden" name="inv_action" id="inv_action" value="draft">
+
 <!-- ── CUSTOMER + HEADER ── -->
 <div class="card" style="margin-bottom:16px;">
     <div class="card-body">
 
         <div style="display:grid; grid-template-columns:1fr auto; gap:20px; align-items:start;">
+
             <!-- Customer Searchable Dropdown -->
             <div>
                 <label style="font-size:13px; font-weight:600; color:#e53e3e; display:block; margin-bottom:6px;">Customer Name *</label>
@@ -80,7 +100,8 @@
                         <div class="cd-search"><input type="text" id="custSearch" placeholder="Search customers..." oninput="filterCustomers(this.value)"></div>
                         <div id="custOptions">
                             <?php foreach ($customers as $cu): ?>
-                            <div class="cd-item" data-id="<?= $cu['id'] ?>"
+                            <div class="cd-item"
+                                data-id="<?= $cu['id'] ?>"
                                 data-name="<?= esc($cu['display_name']) ?>"
                                 data-email="<?= esc($cu['email']) ?>"
                                 data-phone="<?= esc($cu['work_phone']) ?>"
@@ -116,7 +137,6 @@
                         <div class="cp-name" id="cp_name"></div>
                         <div class="cp-line" id="cp_addr"></div>
                         <div class="cp-line" id="cp_contact"></div>
-                        <?php /* GSTIN badge */ ?>
                         <span class="cp-badge" id="cp_gstin" style="display:none"></span>
                     </div>
                     <div style="text-align:right; white-space:nowrap;">
@@ -130,15 +150,21 @@
             <div style="min-width:220px;">
                 <div style="margin-bottom:12px;">
                     <label style="font-size:13px; font-weight:600; color:#e53e3e; display:block; margin-bottom:6px;">Invoice# *</label>
-                    <div style="border:1.5px solid #5065e8; border-radius:6px; padding:9px 12px; font-size:14px; font-weight:600; color:#1a1f36; background:#fff; min-width:180px;">
-                        <?php
-                            $db = \Config\Database::connect();
-                            $last = $db->query("SELECT invoice_number FROM invoices ORDER BY id DESC LIMIT 1")->getRowArray();
-                            $num = $last ? intval(substr($last['invoice_number'], 4)) + 1 : 1;
-                            $nextNum = $invoice ? $invoice['invoice_number'] : 'INV-' . str_pad($num, 6, '0', STR_PAD_LEFT);
-                        ?>
-                        <?= $nextNum ?>
-                    </div>
+                    <?php
+                        $db   = \Config\Database::connect();
+                        $last = $db->query("SELECT invoice_number FROM invoices WHERE invoice_number LIKE 'INV-%' ORDER BY id DESC LIMIT 1")->getRowArray();
+                        if ($last && !empty($last['invoice_number'])) {
+                            $lastNum = preg_replace('/[^0-9]/', '', $last['invoice_number']);
+                            $num = !empty($lastNum) ? ((int)$lastNum + 1) : 1;
+                        } else {
+                            $num = 1;
+                        }
+                        $nextNum = $invoice ? $invoice['invoice_number'] : 'INV-' . str_pad($num, 6, '0', STR_PAD_LEFT);
+                    ?>
+                    <input type="text" name="invoice_number" class="form-control"
+                        value="<?= esc($nextNum) ?>"
+                        placeholder="Auto generate"
+                        style="border:1.5px solid #5065e8;border-radius:6px;padding:9px 12px;font-size:14px;font-weight:600;color:#1a1f36;background:#fff;min-width:180px;">
                 </div>
                 <div>
                     <label style="font-size:13px; font-weight:500; color:#374151; display:block; margin-bottom:6px;">Reference#</label>
@@ -147,7 +173,7 @@
             </div>
         </div>
 
-        <!-- Row 2: Dates + Terms -->
+        <!-- Row 2: Dates + Terms + Subject -->
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr 2fr; gap:16px; margin-top:18px;">
             <div>
                 <label style="font-size:13px; font-weight:600; color:#e53e3e; display:block; margin-bottom:6px;">Invoice Date *</label>
@@ -170,6 +196,7 @@
                 <input type="text" name="subject" class="form-control" value="<?= esc($invoice['subject'] ?? '') ?>" placeholder="e.g. Invoice for services rendered">
             </div>
         </div>
+
     </div>
 </div>
 
@@ -183,12 +210,13 @@
         <table class="items-tbl" id="itemsTable">
             <thead>
                 <tr>
-                    <th style="min-width:200px;">Item Details</th>
-                    <th style="width:90px; text-align:center;">Quantity</th>
-                    <th style="width:80px;">Unit</th>
+                    <th style="min-width:220px;">Item Details</th>
+                    <th style="width:110px;">HSN/SAC</th>
+                    <th style="width:80px; text-align:center;">Qty</th>
+                    <th style="width:70px;">Unit</th>
                     <th style="width:110px; text-align:right;">Rate (₹)</th>
-                    <th style="width:100px; text-align:center;">Discount %</th>
-                    <th style="width:150px;">Tax</th>
+                    <th style="width:90px; text-align:center;">Disc %</th>
+                    <th style="width:140px;">Tax</th>
                     <th style="width:110px; text-align:right;">Amount (₹)</th>
                     <th style="width:36px;"></th>
                 </tr>
@@ -197,7 +225,7 @@
         </table>
     </div>
     <div style="padding:10px 20px; border-top:1px solid #f5f5f5;">
-        <button type="button" onclick="addRow()" style="background:none; border:none; color:#5065e8; font-size:13px; font-weight:500; cursor:pointer; display:flex; align-items:center; gap:4px;">
+        <button type="button" onclick="addRow()" style="background:none;border:none;color:#5065e8;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px;">
             <i class="bi bi-plus-circle"></i> Add Another Line
         </button>
     </div>
@@ -226,58 +254,58 @@
                 <span class="tr" style="display:flex;align-items:center;gap:4px;">
                     <select id="discType" name="discount_type" onchange="calcAll()" style="border:1px solid #d1d5db;border-radius:4px;padding:3px 6px;font-size:12px;">
                         <option value="percent" <?= ($invoice['discount_type'] ?? 'percent') == 'percent' ? 'selected' : '' ?>>%</option>
-                        <option value="fixed" <?= ($invoice['discount_type'] ?? '') == 'fixed' ? 'selected' : '' ?>>Fixed</option>
+                        <option value="fixed"   <?= ($invoice['discount_type'] ?? '') == 'fixed' ? 'selected' : '' ?>>Fixed</option>
                     </select>
                     <input type="number" id="discVal" name="discount_value" oninput="calcAll()" value="<?= $invoice['discount_value'] ?? 0 ?>" min="0" step="0.01" style="width:70px;border:1px solid #d1d5db;border-radius:4px;padding:3px 8px;font-size:12px;">
                 </span>
             </div>
-            <div class="totals-row"><span class="tl" id="dDiscLabel">- Discount</span><span class="tr" style="color:#dc2626;" id="dDisc">-₹0.00</span></div>
+            <div class="totals-row"><span class="tl">- Discount</span><span class="tr" style="color:#dc2626;" id="dDisc">-₹0.00</span></div>
             <div class="totals-row"><span class="tl">Tax Total</span><span class="tr" id="dTax">₹0.00</span></div>
             <div class="totals-row grand"><span class="tl">Total (₹)</span><span class="tr" id="dTotal">₹0.00</span></div>
         </div>
 
-        <input type="hidden" name="sub_total" id="sub_total">
-        <input type="hidden" name="tax_total" id="tax_total">
+        <input type="hidden" name="sub_total"       id="sub_total">
+        <input type="hidden" name="tax_total"       id="tax_total">
         <input type="hidden" name="discount_amount" id="disc_amount">
-        <input type="hidden" name="total" id="total_hidden">
+        <input type="hidden" name="total"           id="total_hidden">
     </div>
 </div>
 
 <!-- ── ACTION BUTTONS ── -->
-<div style="display:flex; gap:10px; margin-bottom:40px;">
-    <button type="submit" name="inv_action" value="draft" class="btn btn-outline" style="font-weight:600;">
+<div class="inv-actions">
+    <button type="button" onclick="submitInvoice('draft')" class="btn btn-draft">
         <i class="bi bi-file-earmark"></i> Save as Draft
     </button>
-
-    <button type="submit" name="inv_action" value="sent" class="btn btn-primary" style="font-weight:600;">
+    <button type="button" onclick="submitInvoice('sent')" class="btn btn-send">
         <i class="bi bi-check-circle"></i> Save and Send
     </button>
-
     <a href="<?= base_url('invoice/invoices') ?>" class="btn btn-outline">Cancel</a>
 </div>
 
 </form>
 
 <script>
-const _customers = <?= json_encode($customers) ?>;
-const _items     = <?= json_encode($items) ?>;
-const _taxes     = <?= json_encode($taxes) ?>;
+const _items = <?= json_encode($items) ?>;
+const _taxes = <?= json_encode($taxes) ?>;
 
+/* ── Fix 1: Submit with correct action ── */
+function submitInvoice(action) {
+    document.getElementById('inv_action').value = action;
+    document.getElementById('invoiceForm').submit();
+}
+
+/* ── Customer dropdown ── */
 function toggleCustList() {
     const list = document.getElementById('custList');
     list.classList.toggle('open');
-    if (list.classList.contains('open')) {
-        document.getElementById('custSearch').focus();
-    }
+    if (list.classList.contains('open')) document.getElementById('custSearch').focus();
 }
 
 function filterCustomers(q) {
-    const items = document.querySelectorAll('#custOptions .cd-item');
     q = q.toLowerCase();
-    items.forEach(el => {
-        const name  = el.dataset.name.toLowerCase();
-        const email = el.dataset.email.toLowerCase();
-        el.style.display = (name.includes(q) || email.includes(q)) ? '' : 'none';
+    document.querySelectorAll('#custOptions .cd-item').forEach(el => {
+        const match = el.dataset.name.toLowerCase().includes(q) || el.dataset.email.toLowerCase().includes(q);
+        el.style.display = match ? '' : 'none';
     });
 }
 
@@ -285,83 +313,50 @@ function selectCustomer(el) {
     document.getElementById('custId').value      = el.dataset.id;
     document.getElementById('custDisplay').value = el.dataset.name;
     document.getElementById('custList').classList.remove('open');
-
     document.querySelectorAll('#custOptions .cd-item').forEach(i => i.classList.remove('selected'));
     el.classList.add('selected');
 
     const addr = [el.dataset.address1, el.dataset.address2, el.dataset.city, el.dataset.state, el.dataset.zip, el.dataset.country].filter(Boolean).join(', ');
-
     document.getElementById('cp_name').textContent    = el.dataset.name;
     document.getElementById('cp_addr').textContent    = addr || 'No address on file';
     document.getElementById('cp_contact').textContent = [el.dataset.email, el.dataset.phone].filter(Boolean).join('  |  ');
 
     const gstinEl = document.getElementById('cp_gstin');
+    if (el.dataset.gstin) { gstinEl.textContent = 'GSTIN: ' + el.dataset.gstin; gstinEl.style.display = 'inline-block'; }
+    else { gstinEl.style.display = 'none'; }
 
-    if (el.dataset.gstin) {
-        gstinEl.textContent = 'GSTIN: ' + el.dataset.gstin;
-        gstinEl.style.display = 'inline-block';
-    } else {
-        gstinEl.style.display = 'none';
-    }
-
-    const termsMap = {
-        due_on_receipt: 'Due on Receipt',
-        net15: 'Net 15',
-        net30: 'Net 30',
-        net45: 'Net 45',
-        net60: 'Net 60'
-    };
-
+    const termsMap = { due_on_receipt:'Due on Receipt', net15:'Net 15', net30:'Net 30', net45:'Net 45', net60:'Net 60' };
     document.getElementById('cp_currency').textContent = el.dataset.currency ? 'Currency: ' + el.dataset.currency : '';
     document.getElementById('cp_terms').textContent    = el.dataset.terms ? 'Terms: ' + (termsMap[el.dataset.terms] || el.dataset.terms) : '';
-
     document.getElementById('custPanel').classList.add('show');
 
-    if (el.dataset.terms) {
-        document.getElementById('payTerms').value = el.dataset.terms;
-        updateDueDate();
-    }
+    if (el.dataset.terms) { document.getElementById('payTerms').value = el.dataset.terms; updateDueDate(); }
 }
 
 document.addEventListener('click', function(e) {
-    if (!e.target.closest('#custDropdown')) {
-        document.getElementById('custList').classList.remove('open');
-    }
+    if (!e.target.closest('#custDropdown')) document.getElementById('custList').classList.remove('open');
 });
 
 function updateDueDate() {
-    const terms = document.getElementById('payTerms').value;
+    const terms   = document.getElementById('payTerms').value;
     const invDate = document.getElementById('invoiceDate').value;
-
     if (!invDate) return;
-
-    const days = {
-        due_on_receipt: 0,
-        net15: 15,
-        net30: 30,
-        net45: 45,
-        net60: 60
-    };
-
+    const days = { due_on_receipt:0, net15:15, net30:30, net45:45, net60:60 };
     const d = new Date(invDate);
     d.setDate(d.getDate() + (days[terms] || 0));
     document.getElementById('dueDate').value = d.toISOString().split('T')[0];
 }
 
+/* ── Fix 2 & 3: Item row with HSN/SAC + searchable item dropdown ── */
 let rowIdx = 0;
 
 function addRow(d = {}) {
     rowIdx++;
-
+    const ri    = rowIdx;
     const tbody = document.getElementById('liTbody');
-    const ri = rowIdx;
 
     const taxOpts = _taxes.map(t =>
         `<option value="${t.id}" data-rate="${t.rate}" ${d.tax_id == t.id ? 'selected' : ''}>${t.name} (${t.rate}%)</option>`
-    ).join('');
-
-    const itemOpts = _items.map(i =>
-        `<option value="${i.id}" data-price="${i.selling_price}" data-tax="${i.tax_id ?? ''}" ${d.item_id == i.id ? 'selected' : ''}>${i.name}</option>`
     ).join('');
 
     const units = ['pcs','kg','g','ltr','ml','m','hrs','days','box','dozen'];
@@ -370,42 +365,73 @@ function addRow(d = {}) {
     tr.id = 'row-' + ri;
 
     tr.innerHTML = `
-    <td style="padding:10px 12px; min-width:200px;">
-        <select name="item_id[]" class="item-sel" style="width:100%;border:1px solid #e8eaed;border-radius:6px;padding:6px 10px;font-size:13px;color:#1a1f36;background:#fff;cursor:pointer;">
-            <option value="">Type or click to select an item</option>${itemOpts}
-        </select>
-
+    <td style="padding:10px 12px; min-width:220px;">
+        <!-- Fix 2: Searchable item input -->
+        <div class="item-dropdown" id="idrop-${ri}">
+            <input type="text" class="id-input iname-display"
+                placeholder="Type to search item..."
+                value="${d.item_name ?? ''}"
+                autocomplete="off"
+                oninput="filterItems(${ri}, this.value)"
+                onfocus="openItemList(${ri})"
+            >
+            <div class="id-list" id="ilist-${ri}">
+                ${_items.map(i => `
+                <div class="id-opt"
+                    data-id="${i.id}"
+                    data-name="${i.name}"
+                    data-price="${i.selling_price ?? 0}"
+                    data-tax="${i.tax_id ?? ''}"
+                    data-hsn="${i.hsn_code ?? ''}"
+                    onclick="selectItem(${ri}, this)">
+                    ${i.name}
+                    <div class="id-opt-sub">${i.hsn_code ? 'HSN: ' + i.hsn_code : ''} ${i.selling_price ? '₹' + parseFloat(i.selling_price).toFixed(2) : ''}</div>
+                </div>`).join('')}
+            </div>
+        </div>
+        <input type="hidden" name="item_id[]"   class="iid"   value="${d.item_id ?? ''}">
         <input type="hidden" name="item_name[]" class="iname" value="${d.item_name ?? ''}">
+        <input type="text"   name="item_desc[]" class="desc-input" placeholder="Item description" value="${d.description ?? ''}">
+    </td>
 
-        <input type="text" name="item_desc[]" class="desc-input" placeholder="Item description" value="${d.description ?? ''}">
+    <!-- Fix 3: HSN/SAC column -->
+    <td style="padding:10px 8px;">
+        <input type="text" name="hsn_sac[]" class="hsn-input"
+            value="${d.hsn_sac ?? ''}"
+            placeholder="HSN/SAC"
+            style="width:100%;border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:12px;background:#fff;outline:none;"
+            onfocus="this.style.borderColor='#5065e8'" onblur="this.style.borderColor='#e8eaed'">
     </td>
 
     <td style="padding:10px 8px; text-align:center;">
         <input type="number" name="qty[]" class="num calc qty" value="${d.qty ?? 1}" min="0.01" step="0.01"
-            style="width:70px;border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:13px;text-align:center;background:#fff;">
+            style="width:65px;border:1px solid #e8eaed;border-radius:6px;padding:6px 6px;font-size:13px;text-align:center;background:#fff;outline:none;"
+            onfocus="this.style.borderColor='#5065e8'" onblur="this.style.borderColor='#e8eaed'">
     </td>
 
     <td style="padding:10px 8px;">
-        <select name="unit[]" style="border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:12px;background:#fff;width:100%;">
+        <select name="unit[]" style="border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:12px;background:#fff;width:100%;outline:none;">
             ${units.map(u => `<option ${(d.unit ?? 'pcs') == u ? 'selected' : ''}>${u}</option>`).join('')}
         </select>
     </td>
 
     <td style="padding:10px 8px;">
         <input type="number" name="rate[]" class="num calc rate" value="${d.rate ?? 0}" min="0" step="0.01"
-            style="width:100%;border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:13px;text-align:right;background:#fff;">
+            style="width:100%;border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:13px;text-align:right;background:#fff;outline:none;"
+            onfocus="this.style.borderColor='#5065e8'" onblur="this.style.borderColor='#e8eaed'">
     </td>
 
     <td style="padding:10px 8px; text-align:center;">
         <div style="display:flex;align-items:center;justify-content:center;gap:3px;">
             <input type="number" name="item_discount[]" class="num calc disc" value="${d.discount ?? 0}" min="0" max="100"
-                style="width:60px;border:1px solid #e8eaed;border-radius:6px;padding:6px 6px;font-size:13px;text-align:center;background:#fff;">
+                style="width:55px;border:1px solid #e8eaed;border-radius:6px;padding:6px 5px;font-size:13px;text-align:center;background:#fff;outline:none;"
+                onfocus="this.style.borderColor='#5065e8'" onblur="this.style.borderColor='#e8eaed'">
             <span style="color:#6b7280;font-size:12px;">%</span>
         </div>
     </td>
 
     <td style="padding:10px 8px;">
-        <select name="tax_id[]" class="tselect" style="width:100%;border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:12px;background:#fff;">
+        <select name="tax_id[]" class="tselect" style="width:100%;border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:12px;background:#fff;outline:none;">
             <option value="" data-rate="0">No Tax</option>${taxOpts}
         </select>
         <input type="hidden" name="tax_rate[]" class="trate" value="${d.tax_rate ?? 0}">
@@ -417,46 +443,69 @@ function addRow(d = {}) {
 
     <td style="padding:10px 8px; text-align:center;">
         <span onclick="document.getElementById('row-${ri}').remove();calcAll()"
-            style="cursor:pointer;color:#dc2626;font-size:20px;line-height:1;font-weight:300;">×</span>
+            style="cursor:pointer;color:#dc2626;font-size:22px;line-height:1;font-weight:300;">×</span>
     </td>`;
 
     tbody.appendChild(tr);
 
-    tr.querySelector('.item-sel').onchange = function () {
-        const o = this.options[this.selectedIndex];
-
-        tr.querySelector('.iname').value = o.text !== 'Type or click to select an item' ? o.text : '';
-        tr.querySelector('.rate').value  = o.dataset.price || 0;
-
-        if (o.dataset.tax) {
-            const ts = tr.querySelector('.tselect');
-
-            for (let op of ts.options) {
-                if (op.value == o.dataset.tax) {
-                    op.selected = true;
-                    tr.querySelector('.trate').value = op.dataset.rate || 0;
-                    break;
-                }
-            }
-        }
-
-        calcAll();
-    };
-
     tr.querySelectorAll('.calc').forEach(el => el.addEventListener('input', calcAll));
 
-    tr.querySelector('.tselect').onchange = function () {
+    tr.querySelector('.tselect').onchange = function() {
         tr.querySelector('.trate').value = this.options[this.selectedIndex].dataset.rate || 0;
         calcAll();
     };
 
-    if (d.item_name && !d.item_id) {
-        tr.querySelector('.iname').value = d.item_name;
-    }
-
     calcAll();
 }
 
+/* ── Item search functions ── */
+function openItemList(ri) {
+    document.querySelectorAll('.id-list.open').forEach(l => l.classList.remove('open'));
+    document.getElementById('ilist-' + ri).classList.add('open');
+}
+
+function filterItems(ri, q) {
+    q = q.toLowerCase();
+    const list = document.getElementById('ilist-' + ri);
+    list.classList.add('open');
+    list.querySelectorAll('.id-opt').forEach(opt => {
+        opt.style.display = opt.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+
+function selectItem(ri, opt) {
+    const tr = document.getElementById('row-' + ri);
+    tr.querySelector('.iid').value          = opt.dataset.id;
+    tr.querySelector('.iname').value        = opt.dataset.name;
+    tr.querySelector('.iname-display').value = opt.dataset.name;
+    tr.querySelector('.rate').value         = opt.dataset.price || 0;
+
+    if (opt.dataset.hsn) {
+        tr.querySelector('.hsn-input').value = opt.dataset.hsn;
+    }
+
+    if (opt.dataset.tax) {
+        const ts = tr.querySelector('.tselect');
+        for (let o of ts.options) {
+            if (o.value == opt.dataset.tax) {
+                o.selected = true;
+                tr.querySelector('.trate').value = o.dataset.rate || 0;
+                break;
+            }
+        }
+    }
+
+    document.getElementById('ilist-' + ri).classList.remove('open');
+    calcAll();
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.item-dropdown')) {
+        document.querySelectorAll('.id-list.open').forEach(l => l.classList.remove('open'));
+    }
+});
+
+/* ── Totals calculation ── */
 function calcAll() {
     let sub = 0, tax = 0;
 
@@ -471,18 +520,15 @@ function calcAll() {
         const amt  = base + ta;
 
         const el = tr.querySelector('.ramt');
-
-        if (el) {
-            el.textContent = '₹' + amt.toFixed(2);
-        }
+        if (el) el.textContent = '₹' + amt.toFixed(2);
 
         sub += base;
         tax += ta;
     });
 
-    const dt = document.getElementById('discType')?.value;
-    const dv = parseFloat(document.getElementById('discVal')?.value) || 0;
-    const da = dt === 'percent' ? sub * dv / 100 : dv;
+    const dt  = document.getElementById('discType')?.value;
+    const dv  = parseFloat(document.getElementById('discVal')?.value) || 0;
+    const da  = dt === 'percent' ? sub * dv / 100 : dv;
     const tot = sub - da + tax;
 
     document.getElementById('sub_total').value    = sub.toFixed(2);
@@ -499,21 +545,21 @@ function calcAll() {
 document.getElementById('discType')?.addEventListener('change', calcAll);
 document.getElementById('discVal')?.addEventListener('input',  calcAll);
 
+/* ── Load existing items (edit mode) ── */
 const existingItems = <?= json_encode($invoice_items ?? []) ?>;
+if (existingItems.length) { existingItems.forEach(i => addRow(i)); }
+else { addRow(); }
 
-if (existingItems.length) {
-    existingItems.forEach(i => addRow(i));
-} else {
-    addRow();
-}
-
+/* ── Pre-select customer (edit mode) ── */
 <?php if ($invoice && $invoice['customer_id']): ?>
 const preEl = document.querySelector('#custOptions .cd-item[data-id="<?= $invoice['customer_id'] ?>"]');
-
-if (preEl) {
-    selectCustomer(preEl);
-}
+if (preEl) selectCustomer(preEl);
 <?php endif; ?>
 </script>
 
 <?= $this->endSection() ?>
+PHPEOF
+echo "Done"
+Output
+
+Done

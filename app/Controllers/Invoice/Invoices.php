@@ -54,42 +54,61 @@ class Invoices extends BaseController
 
     public function create()
     {
-        return view(
-            'invoice/invoices/form',
-            $this->formData(null)
-        );
+        return view('invoice/invoices/form', $this->formData(null));
+    }
+
+    private function generateInvoiceNumber()
+    {
+        $db = \Config\Database::connect();
+
+        $last = $db->query("
+            SELECT invoice_number
+            FROM invoices
+            WHERE invoice_number LIKE 'INV-%'
+            ORDER BY id DESC
+            LIMIT 1
+        ")->getRowArray();
+
+        if ($last && !empty($last['invoice_number'])) {
+            $lastNum = preg_replace('/[^0-9]/', '', $last['invoice_number']);
+            $num = !empty($lastNum) ? ((int)$lastNum + 1) : 1;
+        } else {
+            $num = 1;
+        }
+
+        return 'INV-' . str_pad($num, 6, '0', STR_PAD_LEFT);
     }
 
     public function store()
     {
-        $total = $this->request->getPost('total');
+        $total = (float)$this->request->getPost('total');
 
-        $last = $this->m
-            ->orderBy('id', 'DESC')
-            ->first();
+        $invoiceNumber = trim((string)$this->request->getPost('invoice_number'));
 
-        $n = $last
-            ? intval(substr($last['invoice_number'], 4)) + 1
-            : 1;
+        if ($invoiceNumber === '') {
+            $invoiceNumber = $this->generateInvoiceNumber();
+        }
 
-        $in = 'INV-' . str_pad($n, 4, '0', STR_PAD_LEFT);
+        $action = $this->request->getPost('inv_action');
+        $status = ($action === 'sent') ? 'sent' : 'draft';
 
         $id = $this->m->insert([
 
-            'invoice_number'  => $in,
+            'invoice_number'  => $invoiceNumber,
             'customer_id'     => $this->request->getPost('customer_id'),
             'reference'       => $this->request->getPost('reference'),
             'invoice_date'    => $this->request->getPost('invoice_date'),
             'due_date'        => $this->request->getPost('due_date'),
             'payment_terms'   => $this->request->getPost('payment_terms'),
             'subject'         => $this->request->getPost('subject'),
-            'status'          => 'draft',
+            'status'          => $status,
             'sub_total'       => $this->request->getPost('sub_total'),
             'discount_type'   => $this->request->getPost('discount_type'),
             'discount_value'  => $this->request->getPost('discount_value'),
             'discount_amount' => $this->request->getPost('discount_amount'),
             'tax_total'       => $this->request->getPost('tax_total'),
             'total'           => $total,
+            'paid_amount'     => 0,
             'balance_due'     => $total,
             'customer_notes'  => $this->request->getPost('customer_notes'),
             'terms'           => $this->request->getPost('terms')
@@ -100,7 +119,7 @@ class Invoices extends BaseController
 
         return redirect()
             ->to(base_url('invoice/invoices/show/' . $id))
-            ->with('success', 'Invoice ' . $in . ' created');
+            ->with('success', 'Invoice ' . $invoiceNumber . ' created successfully.');
     }
 
     public function show($id)
@@ -121,8 +140,7 @@ class Invoices extends BaseController
                 c.b_zip,
                 c.b_country
             FROM invoices i 
-            LEFT JOIN customers c 
-                ON i.customer_id = c.id 
+            LEFT JOIN customers c ON i.customer_id = c.id 
             WHERE i.id = ?
         ", [$id])->getRowArray();
 
@@ -158,23 +176,60 @@ class Invoices extends BaseController
 
     public function update($id)
     {
-        $total = $this->request->getPost('total');
+        $total = (float)$this->request->getPost('total');
+
+        $oldInvoice = $this->m->find($id);
+
+        if (!$oldInvoice) {
+            return redirect()
+                ->to(base_url('invoice/invoices'))
+                ->with('error', 'Invoice not found.');
+        }
+
+        $invoiceNumber = trim((string)$this->request->getPost('invoice_number'));
+
+        if ($invoiceNumber === '') {
+            $invoiceNumber = $oldInvoice['invoice_number'] ?? $this->generateInvoiceNumber();
+        }
+
+        $action = $this->request->getPost('inv_action');
+        $status = ($action === 'sent') ? 'sent' : 'draft';
+
+        $db = \Config\Database::connect();
+
+        $paidRow = $db->table('payments')
+            ->selectSum('amount')
+            ->where('invoice_id', $id)
+            ->get()
+            ->getRowArray();
+
+        $paidAmount = (float)($paidRow['amount'] ?? 0);
+        $balanceDue = max(0, $total - $paidAmount);
+
+        if ($paidAmount > 0 && $balanceDue <= 0) {
+            $status = 'paid';
+        } elseif ($paidAmount > 0 && $balanceDue > 0) {
+            $status = 'partially_paid';
+        }
 
         $this->m->update($id, [
 
+            'invoice_number'  => $invoiceNumber,
             'customer_id'     => $this->request->getPost('customer_id'),
             'reference'       => $this->request->getPost('reference'),
             'invoice_date'    => $this->request->getPost('invoice_date'),
             'due_date'        => $this->request->getPost('due_date'),
             'payment_terms'   => $this->request->getPost('payment_terms'),
             'subject'         => $this->request->getPost('subject'),
+            'status'          => $status,
             'sub_total'       => $this->request->getPost('sub_total'),
             'discount_type'   => $this->request->getPost('discount_type'),
             'discount_value'  => $this->request->getPost('discount_value'),
             'discount_amount' => $this->request->getPost('discount_amount'),
             'tax_total'       => $this->request->getPost('tax_total'),
             'total'           => $total,
-            'balance_due'     => $total,
+            'paid_amount'     => $paidAmount,
+            'balance_due'     => $balanceDue,
             'customer_notes'  => $this->request->getPost('customer_notes'),
             'terms'           => $this->request->getPost('terms')
 
@@ -188,7 +243,7 @@ class Invoices extends BaseController
 
         return redirect()
             ->to(base_url('invoice/invoices/show/' . $id))
-            ->with('success', 'Invoice updated');
+            ->with('success', 'Invoice updated successfully.');
     }
 
     public function delete($id)
@@ -244,34 +299,43 @@ class Invoices extends BaseController
             return;
         }
 
+        $itemIds       = $this->request->getPost('item_id') ?? [];
+        $descriptions  = $this->request->getPost('item_desc') ?? [];
+        $hsnSac        = $this->request->getPost('hsn_sac') ?? [];
+        $qtys          = $this->request->getPost('qty') ?? [];
+        $units         = $this->request->getPost('unit') ?? [];
+        $rates         = $this->request->getPost('rate') ?? [];
+        $discounts     = $this->request->getPost('item_discount') ?? [];
+        $taxIds        = $this->request->getPost('tax_id') ?? [];
+        $taxRates      = $this->request->getPost('tax_rate') ?? [];
+
         foreach ($names as $k => $name) {
 
-            if (!$name) {
+            if (trim((string)$name) === '') {
                 continue;
             }
 
-            $qty  = $this->request->getPost('qty')[$k] ?? 1;
-            $rate = $this->request->getPost('rate')[$k] ?? 0;
-            $disc = $this->request->getPost('item_discount')[$k] ?? 0;
-            $tr   = $this->request->getPost('tax_rate')[$k] ?? 0;
+            $qty  = (float)($qtys[$k] ?? 1);
+            $rate = (float)($rates[$k] ?? 0);
+            $disc = (float)($discounts[$k] ?? 0);
+            $tr   = (float)($taxRates[$k] ?? 0);
 
             $base = $qty * $rate * (1 - $disc / 100);
-
-            $ta = $base * $tr / 100;
-
-            $amt = $base + $ta;
+            $ta   = $base * $tr / 100;
+            $amt  = $base + $ta;
 
             $this->im->insert([
 
                 'invoice_id'  => $iid,
-                'item_id'     => $this->request->getPost('item_id')[$k] ?? null,
+                'item_id'     => $itemIds[$k] ?? null,
                 'item_name'   => $name,
-                'description' => $this->request->getPost('item_desc')[$k] ?? '',
+                'description' => $descriptions[$k] ?? '',
+                'hsn_sac'     => $hsnSac[$k] ?? '',
                 'qty'         => $qty,
-                'unit'        => $this->request->getPost('unit')[$k] ?? 'pcs',
+                'unit'        => $units[$k] ?? 'pcs',
                 'rate'        => $rate,
                 'discount'    => $disc,
-                'tax_id'      => $this->request->getPost('tax_id')[$k] ?? null,
+                'tax_id'      => $taxIds[$k] ?? null,
                 'tax_rate'    => $tr,
                 'tax_amount'  => $ta,
                 'amount'      => $amt
