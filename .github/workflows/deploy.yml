@@ -8,33 +8,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: 82.112.232.206
-          username: u477483561
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          local-dir: ./
-          server-dir: /public_html/master/
-          force-upload: true
-          dangerous-clean-slate: true
-          exclude: |
-            **/.git/**
-            **/.git*
-            **/.github/**
-            **/.vscode/**
-            **/node_modules/**
-            **/tests/**
-            **/vendor/**
-            **/system/**
-            **/writable/**
-            **/.env
-            **/*.log
+      - name: Sync Files to Server
+        run: |
+          sudo apt-get install lftp -y
+          lftp -c "set ftp:ssl-allow no; open -u u477483561,${{ secrets.FTP_PASSWORD }} 82.112.232.206; mirror -R --only-newer --verbose --exclude-glob .git* --exclude-glob .vscode --exclude-glob vendor --exclude-glob writable --exclude-glob system --exclude-glob .env --exclude-glob *.log ./ /public_html/master/"
