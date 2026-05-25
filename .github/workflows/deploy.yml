@@ -22,8 +22,8 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./
-          server-dir: /public_html/master/
-          state-name: .ftp-deploy-sync-state.json
+          server-dir: /domains/slysis.com/public_html/master/
+          state-name: ../.ftp-sync-state.json
           dangerous-clean-slate: false
           exclude: |
             **/.git/**

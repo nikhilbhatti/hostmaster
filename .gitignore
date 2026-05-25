@@ -1,0 +1,5 @@
+writable/
+vendor/
+system/
+.env
+*.log
