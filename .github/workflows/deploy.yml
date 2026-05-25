@@ -1,5 +1,4 @@
 name: Live Deploy
-
 on:
   push:
     branches:
@@ -9,10 +8,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Sync Files to Server
+      - name: Deploy using lftp
         run: |
+          sudo apt-get update
           sudo apt-get install lftp -y
-          lftp -c "set ftp:ssl-allow no; open -u u477483561,${{ secrets.FTP_PASSWORD }} 82.112.232.206; mirror -R --only-newer --verbose --exclude-glob .git* --exclude-glob .vscode --exclude-glob vendor --exclude-glob writable --exclude-glob system --exclude-glob .env --exclude-glob *.log ./ /public_html/master/"
+          lftp -c "set ftp:ssl-allow no; open -u u477483561,${{ secrets.FTP_PASSWORD }} 82.112.232.206; mirror -R --verbose --only-newer --exclude-glob .git* --exclude-glob .vscode --exclude-glob vendor --exclude-glob writable --exclude-glob system --exclude-glob .env --exclude-glob *.log ./ /public_html/master/"
