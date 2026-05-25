@@ -1,4 +1,5 @@
 name: Live Deploy
+
 on:
   push:
     branches:
@@ -7,21 +8,31 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy with lftp
-        run: |
-          sudo apt-get install lftp -y
-          lftp -u u477483561,${{ secrets.FTP_PASSWORD }} 82.112.232.206 <<EOF
-          set ftp:ssl-allow no
-          mirror -R --only-newer --verbose \
-            --exclude-glob .git \
-            --exclude-glob .github \
-            --exclude-glob .vscode \
-            --exclude-glob vendor \
-            --exclude-glob writable \
-            --exclude-glob system \
-            ./ /public_html/master/
-          bye
-          EOF
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: 82.112.232.206
+          username: u477483561
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./
+          server-dir: /public_html/master/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git/**
+            **/.git*
+            **/.github/**
+            **/.vscode/**
+            **/node_modules/**
+            **/tests/**
+            **/vendor/**
+            **/system/**
+            **/writable/**
+            **/.env
+            **/*.log
