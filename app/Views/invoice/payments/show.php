@@ -46,15 +46,7 @@
 
 .btn-new-payment:hover{
     background:#2f76e5;
-}
-
-.btn-more{
-    border:1px solid #d1d5db;
-    background:#fff;
-    padding:10px 14px;
-    border-radius:6px;
-    color:#111827;
-    cursor:pointer;
+    color:#fff;
 }
 
 .payments-table-wrap{
@@ -64,7 +56,7 @@
 .payments-table{
     width:100%;
     border-collapse:collapse;
-    min-width:1200px;
+    min-width:1500px;
 }
 
 .payments-table thead{
@@ -85,7 +77,7 @@
 .payments-table td{
     padding:16px 18px;
     border-bottom:1px solid #edf0f5;
-    font-size:15px;
+    font-size:14px;
     color:#111827;
     vertical-align:middle;
 }
@@ -115,15 +107,59 @@
     text-decoration:underline;
 }
 
-.status-paid{
-    color:#16a34a;
+.status-badge{
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:11px;
     font-weight:700;
+    display:inline-block;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+.status-paid{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.status-partial{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.status-unpaid{
+    background:#fee2e2;
+    color:#991b1b;
 }
 
 .amount{
     font-weight:700;
     text-align:right;
     white-space:nowrap;
+}
+
+.amount-green{
+    color:#16a34a;
+}
+
+.amount-red{
+    color:#dc2626;
+}
+
+.history-btn{
+    background:#111827;
+    color:#fff;
+    padding:8px 12px;
+    border-radius:5px;
+    text-decoration:none;
+    font-size:12px;
+    font-weight:600;
+    display:inline-block;
+}
+
+.history-btn:hover{
+    background:#000;
+    color:#fff;
 }
 
 .empty-state{
@@ -144,19 +180,15 @@ input[type="checkbox"]{
     <div class="payments-top">
 
         <div class="payments-title">
-            All Received Payments <span>⌄</span>
+            Invoice Payment Ledger <span>⌄</span>
         </div>
 
         <div class="payments-actions">
 
             <a href="<?= base_url('invoice/payments/create') ?>"
                class="btn-new-payment">
-                + New
+                + Receive Payment
             </a>
-
-            <button type="button" class="btn-more">
-                ⋯
-            </button>
 
         </div>
 
@@ -174,27 +206,25 @@ input[type="checkbox"]{
                         <input type="checkbox">
                     </th>
 
-                    <th>Date</th>
+                    <th>Invoice #</th>
 
-                    <th>Payment #</th>
+                    <th>Customer</th>
 
-                    <th>Reference Number</th>
+                    <th>Invoice Date</th>
 
-                    <th>Customer Name</th>
+                    <th>Last Payment</th>
 
-                    <th>Invoice#</th>
+                    <th style="text-align:right;">Invoice Total</th>
 
-                    <th>Mode</th>
+                    <th style="text-align:right;">Paid Amount</th>
 
-                    <th style="text-align:right;">
-                        Amount
-                    </th>
+                    <th style="text-align:right;">Balance Due</th>
 
-                    <th style="text-align:right;">
-                        Unused Amount
-                    </th>
+                    <th>Total Payments</th>
 
                     <th>Status</th>
+
+                    <th>History</th>
 
                 </tr>
 
@@ -206,7 +236,24 @@ input[type="checkbox"]{
 
                 <?php foreach($payments as $p): ?>
 
-                    <tr onclick="window.location.href='<?= base_url('invoice/payments/indexpage') ?>'">
+                    <?php
+                        $invoiceId      = $p['invoice_id'] ?? 0;
+                        $invoiceTotal   = (float)($p['total'] ?? 0);
+                        $paidAmount     = (float)($p['paid_amount'] ?? 0);
+                        $balanceDue     = (float)($p['balance_due'] ?? ($invoiceTotal - $paidAmount));
+                        $status         = strtolower($p['status'] ?? 'unpaid');
+
+                        $statusClass = 'status-unpaid';
+
+                        if($status == 'paid'){
+                            $statusClass = 'status-paid';
+                        }
+                        elseif($status == 'partially_paid'){
+                            $statusClass = 'status-partial';
+                        }
+                    ?>
+
+                    <tr onclick="window.location.href='<?= base_url('invoice/payments?active_id=' . $invoiceId) ?>'">
 
                         <td class="checkbox-col"
                             onclick="event.stopPropagation();">
@@ -216,23 +263,15 @@ input[type="checkbox"]{
                         </td>
 
                         <td>
-                            <?= date('d/m/Y', strtotime($p['payment_date'])) ?>
-                        </td>
 
-                        <td>
-
-                            <a href="<?= base_url('invoice/payments/indexpage') ?>"
+                            <a href="<?= base_url('invoice/payments?active_id=' . $invoiceId) ?>"
                                class="payment-link"
                                onclick="event.stopPropagation();">
 
-                                <?= esc($p['payment_number']) ?>
+                                <?= esc($p['invoice_number'] ?? '-') ?>
 
                             </a>
 
-                        </td>
-
-                        <td>
-                            <?= esc($p['reference'] ?? '-') ?>
                         </td>
 
                         <td>
@@ -240,28 +279,57 @@ input[type="checkbox"]{
                         </td>
 
                         <td>
-                            <?= esc($p['invoice_number'] ?? '-') ?>
+                            <?=
+                                !empty($p['invoice_date'])
+                                ? date('d/m/Y', strtotime($p['invoice_date']))
+                                : '-'
+                            ?>
                         </td>
 
                         <td>
-                            <?= esc(ucfirst($p['payment_mode'] ?? '-')) ?>
+                            <?=
+                                !empty($p['last_payment_date'])
+                                ? date('d/m/Y', strtotime($p['last_payment_date']))
+                                : '-'
+                            ?>
                         </td>
 
                         <td class="amount">
-                            ₹<?= number_format($p['amount'], 2) ?>
+                            ₹<?= number_format($invoiceTotal, 2) ?>
                         </td>
 
-                        <td class="amount">
-                            ₹<?= number_format($p['unused_amount'] ?? $p['amount'], 2) ?>
+                        <td class="amount amount-green">
+                            ₹<?= number_format($paidAmount, 2) ?>
+                        </td>
+
+                        <td class="amount amount-red">
+                            ₹<?= number_format($balanceDue, 2) ?>
                         </td>
 
                         <td>
 
-                            <span class="status-paid">
+                            <?= $p['payment_count'] ?? 0 ?>
 
-                                <?= strtoupper($p['status'] ?? 'PAID') ?>
+                        </td>
+
+                        <td>
+
+                            <span class="status-badge <?= $statusClass ?>">
+
+                                <?= strtoupper(str_replace('_', ' ', $status)) ?>
 
                             </span>
+
+                        </td>
+
+                        <td onclick="event.stopPropagation();">
+
+                            <a href="<?= base_url('invoice/payments/history/' . $invoiceId) ?>"
+                               class="history-btn">
+
+                                View History
+
+                            </a>
 
                         </td>
 
@@ -273,11 +341,11 @@ input[type="checkbox"]{
 
                 <tr>
 
-                    <td colspan="10">
+                    <td colspan="11">
 
                         <div class="empty-state">
 
-                            No payments received yet.
+                            No invoice payments found.
 
                         </div>
 

@@ -3,7 +3,6 @@
 <?= $this->section('content') ?>
 
 <style>
-/* ── ZOHO PREMIUM SPLIT DASHBOARD ENGINE (INDEX MASTER) ── */
 .zoho-split-dashboard {
     display: grid;
     grid-template-columns: 350px 1fr;
@@ -15,8 +14,6 @@
     margin: 10px 0;
     overflow: hidden;
 }
-
-/* Left Sidebar Master Queue List */
 .zoho-sidebar {
     background: #ffffff;
     border-right: 1px solid #e2e8f0;
@@ -32,11 +29,7 @@
     align-items: center;
     background: #f8fafc;
 }
-.sidebar-main-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1e293b;
-}
+.sidebar-main-title { font-size: 15px; font-weight: 600; color: #1e293b; }
 .btn-zoho-new {
     background: #2563eb;
     color: #ffffff;
@@ -45,16 +38,10 @@
     font-weight: 500;
     border-radius: 4px;
     text-decoration: none !important;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
 }
-.btn-zoho-new:hover { background: #1d4ed8; }
+.btn-zoho-new:hover { background: #1d4ed8; color:#fff; }
 
-.sidebar-scroll-stack {
-    overflow-y: auto;
-    flex: 1;
-}
+.sidebar-scroll-stack { overflow-y: auto; flex: 1; }
 .payment-master-card {
     padding: 16px 20px;
     border-bottom: 1px solid #f1f5f9;
@@ -74,10 +61,19 @@
 .meta-card-left { display: flex; flex-direction: column; gap: 3px; }
 .card-cust-name { font-weight: 600; font-size: 13.5px; color: #1e293b; }
 .card-sub-hints { font-size: 12px; color: #64748b; }
-.card-status-badge { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.card-status-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+.status-paid { color:#16a34a; }
+.status-partial { color:#d97706; }
+.status-unpaid { color:#dc2626; }
 .card-meta-right { text-align: right; font-weight: 600; font-size: 13.5px; color: #0f172a; }
+.card-meta-small { display:block; font-size:11px; color:#64748b; font-weight:400; margin-top:3px; }
 
-/* Right Section Document Viewer Workspace */
 .zoho-viewer-workspace {
     background: #f8fafc;
     display: flex;
@@ -97,9 +93,7 @@
     z-index: 10;
 }
 .ribbon-doc-title { font-size: 18px; font-weight: 600; color: #0f172a; }
-.ribbon-actions-group { display: flex; gap: 8px; }
-
-/* Control Buttons Minimal Styling */
+.ribbon-actions-group { display: flex; gap: 8px; flex-wrap:wrap; }
 .btn-ribbon-utility {
     background: #ffffff;
     border: 1px solid #cbd5e1;
@@ -109,16 +103,12 @@
     font-weight: 500;
     border-radius: 4px;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
     text-decoration: none !important;
 }
 .btn-ribbon-utility:hover { background: #f8fafc; border-color: #94a3b8; }
 .btn-ribbon-delete { color: #dc2626; }
 .btn-ribbon-delete:hover { background: #fef2f2; border-color: #fca5a5; }
 
-/* What's Next Alert Box */
 .whats-next-banner {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -130,16 +120,31 @@
     align-items: center;
 }
 .banner-text-side { font-size: 13px; color: #334155; }
-.banner-text-side strong { color: #0f172a; font-weight: 600; display: block; font-size: 11px; margin-bottom: 2px; letter-spacing: 0.5px; }
-.btn-action-paid-trigger { background: #2563eb; color: #fff; border: 1px solid #2563eb; padding: 5px 12px; font-size: 12.5px; font-weight: 500; border-radius: 4px; text-decoration: none !important; }
-.btn-action-paid-trigger:hover { background: #1d4ed8; }
+.banner-text-side strong {
+    color: #0f172a;
+    font-weight: 600;
+    display: block;
+    font-size: 11px;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+}
+.btn-action-paid-trigger {
+    background: #2563eb;
+    color: #fff;
+    border: 1px solid #2563eb;
+    padding: 5px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    border-radius: 4px;
+    text-decoration: none !important;
+}
+.btn-action-paid-trigger:hover { background: #1d4ed8; color:#fff; }
 
-/* ── PROFESSIONAL A4 CANVAS PRINT SHEET ── */
 .canvas-scroll-container { padding: 24px; }
 .receipt-a4-sheet {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    max-width: 800px;
+    max-width: 850px;
     width: 100%;
     margin: 0 auto;
     box-shadow: 0 4px 12px rgba(0,0,0,0.04);
@@ -148,8 +153,6 @@
     position: relative;
     min-height: 842px;
 }
-
-/* Diagonal Draft Status Watermark */
 .draft-corner-tag {
     position: absolute;
     top: 24px;
@@ -162,16 +165,24 @@
     transform: rotate(-45deg);
     text-transform: uppercase;
     letter-spacing: 1px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
 .sheet-header-flex { display: flex; justify-content: space-between; margin-bottom: 45px; }
-.brand-identity-box { display: flex; flex-direction: column; gap: 3px; }
-.brand-main-logo { font-size: 26px; font-weight: 700; color: #0f172a; text-transform: lowercase; margin-bottom: 4px; letter-spacing: -0.5px; }
+.brand-main-logo {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+    text-transform: lowercase;
+    margin-bottom: 4px;
+}
 .brand-address-text { font-size: 13px; color: #475569; line-height: 1.6; }
-.sheet-main-title { font-size: 22px; font-weight: 400; color: #475569; text-transform: uppercase; letter-spacing: 1px; text-align: right; }
-
-/* Mid Info Param Matrix */
+.sheet-main-title {
+    font-size: 22px;
+    font-weight: 400;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: right;
+}
 .sheet-meta-matrix {
     display: grid;
     grid-template-columns: 1fr 260px;
@@ -184,24 +195,70 @@
 .matrix-data-table td:first-child { color: #64748b; width: 140px; }
 .matrix-data-table td strong { color: #0f172a; font-weight: 500; }
 
-/* Zoho Green Box Configuration */
 .zoho-green-amount-box {
-    background: #71a062 !important; /* Zoho Green Emerald Shade */
+    background: #71a062 !important;
     color: #ffffff !important;
     padding: 20px;
     border-radius: 4px;
     text-align: left;
 }
-.green-box-label { font-size: 11px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 500; }
+.green-box-label {
+    font-size: 11px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
 .green-box-sum { font-size: 26px; font-weight: 700; }
 
-/* Allocation Linked Items Table */
-.allocation-header-title { font-size: 12px; font-weight: 600; color: #0f172a; margin-top: 50px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-.allocation-grid-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.allocation-grid-table th { border-bottom: 2px solid #e2e8f0; padding: 10px 0; text-align: left; color: #64748b; font-weight: 500; }
-.allocation-grid-table td { border-bottom: 1px solid #f1f5f9; padding: 14px 0; color: #334155; }
+.summary-grid {
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:12px;
+    margin-top:30px;
+}
+.summary-box {
+    border:1px solid #e2e8f0;
+    background:#f8fafc;
+    border-radius:6px;
+    padding:14px;
+}
+.summary-label {
+    font-size:11px;
+    color:#64748b;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:5px;
+}
+.summary-value {
+    font-size:17px;
+    color:#0f172a;
+    font-weight:700;
+}
 
-/* Empty Placeholder Central Box */
+.allocation-header-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-top: 50px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.allocation-grid-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.allocation-grid-table th {
+    border-bottom: 2px solid #e2e8f0;
+    padding: 10px 0;
+    text-align: left;
+    color: #64748b;
+    font-weight: 500;
+}
+.allocation-grid-table td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 14px 0;
+    color: #334155;
+}
 .empty-center-state {
     display: flex;
     flex-direction: column;
@@ -213,39 +270,30 @@
     font-style: italic;
 }
 
-/* ── STRICT PRINT ENGINE OVERRIDES (FIXED PDF STRUCTURE) ── */
 @media print {
-    /* Main dashboard layout wrapper completely hidden */
     html, body {
         background: #ffffff !important;
         margin: 0 !important;
         padding: 0 !important;
         height: auto !important;
     }
-    
-    /* Layout structural containers hidden */
-    .zoho-split-dashboard,
-    .zoho-sidebar,
-    .viewer-top-ribbon,
-    .whats-next-banner,
-    .canvas-scroll-container {
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        display: block !important;
-    }
-    
-    /* Hide dashboard sidebar and layout elements completely */
     .zoho-sidebar,
     .viewer-top-ribbon,
     .whats-next-banner {
         display: none !important;
     }
-
-    /* Target canvas block extraction */
+    .zoho-split-dashboard,
+    .zoho-viewer-workspace,
+    .canvas-scroll-container {
+        display: block !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        height:auto !important;
+        overflow:visible !important;
+    }
     .receipt-a4-sheet {
-        position: static !important;
         margin: 0 auto !important;
         padding: 40px 50px !important;
         box-shadow: none !important;
@@ -253,95 +301,179 @@
         width: 100% !important;
         max-width: 100% !important;
         min-height: auto !important;
-        page-break-inside: avoid !important;
     }
-
-    /* Force absolute rendering of CSS rules for chrome/safari print drivers */
     * {
         -webkit-print-color-adjust: exact !important;
         color-adjust: exact !important;
     }
-
-    /* Ensure Zoho Emerald Green remains visible */
-    .zoho-green-amount-box {
-        background-color: #71a062 !important;
-        color: #ffffff !important;
-    }
 }
 </style>
 
+<?php
+    /*
+    IMPORTANT:
+    Controller se $payments invoice-wise grouped array aana chahiye.
+    Recommended fields:
+    invoice_id, invoice_number, cname, total, paid_amount, balance_due, status, last_payment_date, payment_count
+    */
+
+    $active_id = service('request')->getGet('active_id');
+
+    if (empty($active_id) && !empty($payments)) {
+        $active_id = $payments[0]['invoice_id'] ?? $payments[0]['id'] ?? null;
+    }
+
+    $current_p = null;
+
+    if (!empty($payments)) {
+        foreach ($payments as $pay) {
+            $row_id = $pay['invoice_id'] ?? $pay['id'] ?? null;
+
+            if ($row_id == $active_id) {
+                $current_p = $pay;
+                break;
+            }
+        }
+
+        if (!$current_p) {
+            $current_p = $payments[0];
+        }
+    }
+
+    $invoiceId      = $current_p['invoice_id'] ?? null;
+    $invoiceNumber  = $current_p['invoice_number'] ?? '--';
+    $customerName   = $current_p['cname'] ?? 'Unknown Customer';
+    $invoiceTotal   = (float)($current_p['total'] ?? 0);
+    $paidAmount     = (float)($current_p['paid_amount'] ?? 0);
+    $balanceDue     = (float)($current_p['balance_due'] ?? max(0, $invoiceTotal - $paidAmount));
+    $status         = strtolower($current_p['status'] ?? 'unpaid');
+    $lastPayDate    = $current_p['last_payment_date'] ?? null;
+    $paymentCount   = (int)($current_p['payment_count'] ?? 0);
+
+    $statusClass = 'status-unpaid';
+    if ($status == 'paid') {
+        $statusClass = 'status-paid';
+    } elseif ($status == 'partially_paid' || $status == 'partial') {
+        $statusClass = 'status-partial';
+    }
+?>
+
 <div class="zoho-split-dashboard">
-    
+
     <div class="zoho-sidebar">
         <div class="sidebar-header-row">
-            <span class="sidebar-main-title">Payments Received</span>
+            <span class="sidebar-main-title">Invoice Payment</span>
             <a href="<?= base_url('invoice/payments/create') ?>" class="btn-zoho-new">
                 <i class="bi bi-plus"></i> New
             </a>
         </div>
-        
+
         <div class="sidebar-scroll-stack">
-            <?php 
-                $active_id = $active_payment['id'] ?? (!empty($payments) ? $payments[0]['id'] : null); 
-            ?>
-            <?php if(!empty($payments)): ?>
-                <?php foreach($payments as $index => $pay): ?>
-                    <a href="<?= base_url('invoice/payments?active_id=' . $pay['id']) ?>" class="payment-master-card <?= ($pay['id'] == $active_id) ? 'active-selected' : '' ?>">
+            <?php if (!empty($payments)): ?>
+                <?php foreach ($payments as $pay): ?>
+                    <?php
+                        $rowId       = $pay['invoice_id'] ?? $pay['id'] ?? null;
+                        $rowTotal    = (float)($pay['total'] ?? 0);
+                        $rowPaid     = (float)($pay['paid_amount'] ?? 0);
+                        $rowBalance  = (float)($pay['balance_due'] ?? max(0, $rowTotal - $rowPaid));
+                        $rowStatus   = strtolower($pay['status'] ?? 'unpaid');
+
+                        $rowStatusClass = 'status-unpaid';
+                        if ($rowStatus == 'paid') {
+                            $rowStatusClass = 'status-paid';
+                        } elseif ($rowStatus == 'partially_paid' || $rowStatus == 'partial') {
+                            $rowStatusClass = 'status-partial';
+                        }
+                    ?>
+
+                    <a href="<?= base_url('invoice/payments?active_id=' . $rowId) ?>"
+                       class="payment-master-card <?= ($rowId == $active_id) ? 'active-selected' : '' ?>">
+
                         <div class="meta-card-left">
-                            <span class="card-cust-name"><?= esc($pay['cname']) ?></span>
-                            <span class="card-sub-hints"><?= esc($pay['payment_number']) ?> • <?= date('d/m/Y', strtotime($pay['payment_date'])) ?></span>
-                            <span class="card-status-badge">Draft</span>
+                            <span class="card-cust-name"><?= esc($pay['cname'] ?? 'Unknown Customer') ?></span>
+
+                            <span class="card-sub-hints">
+                                <?= esc($pay['invoice_number'] ?? '--') ?>
+                                <?php if (!empty($pay['last_payment_date'])): ?>
+                                    • Last: <?= date('d/m/Y', strtotime($pay['last_payment_date'])) ?>
+                                <?php endif; ?>
+                            </span>
+
+                            <span class="card-status-badge <?= $rowStatusClass ?>">
+                                <?= esc(str_replace('_', ' ', strtoupper($rowStatus))) ?>
+                            </span>
                         </div>
+
                         <div class="card-meta-right">
-                            ₹<?= number_format($pay['amount'], 2) ?>
+                            ₹<?= number_format($rowPaid, 2) ?>
+                            <span class="card-meta-small">
+                                Bal: ₹<?= number_format($rowBalance, 2) ?>
+                            </span>
                         </div>
                     </a>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div style="padding: 30px; text-align: center; color: #94a3b8; font-size: 13px;">No payments recorded yet.</div>
+                <div style="padding: 30px; text-align: center; color: #94a3b8; font-size: 13px;">
+                    No invoice payments found.
+                </div>
             <?php endif; ?>
         </div>
     </div>
 
     <div class="zoho-viewer-workspace">
-        <?php 
-            $current_p = null;
-            if (!empty($payments)) {
-                foreach ($payments as $pay) {
-                    if ($pay['id'] == $active_id) {
-                        $current_p = $pay;
-                        break;
-                    }
-                }
-                if (!$current_p) $current_p = $payments[0];
-            }
-        ?>
 
-        <?php if($current_p): ?>
+        <?php if ($current_p): ?>
+
             <div class="viewer-top-ribbon">
-                <div class="ribbon-doc-title"><?= esc($current_p['payment_number']) ?></div>
+                <div class="ribbon-doc-title">
+                    Invoice Payment: <?= esc($invoiceNumber) ?>
+                </div>
+
                 <div class="ribbon-actions-group">
-                    <a href="<?= base_url('invoice/payments/edit/' . $current_p['id']) ?>" class="btn-ribbon-utility">✏️ Edit</a>
-                    <button type="button" class="btn-ribbon-utility" onclick="window.print()">🖨️ PDF / Print</button>
-                    <button type="button" class="btn-ribbon-utility" onclick="alert('Status marked as paid!')">✔️ Mark as Paid</button>
-                    <a href="<?= base_url('invoice/payments/delete/' . $current_p['id']) ?>" class="btn-ribbon-utility btn-ribbon-delete" onclick="return confirm('Are you sure you want to drop this payment track?')">🗑️ Delete</a>
+                    <?php if (!empty($invoiceId)): ?>
+                        <a href="<?= base_url('invoice/payments/create-for-invoice/' . $invoiceId) ?>" class="btn-ribbon-utility">
+                            ➕ Add Payment
+                        </a>
+
+                        <a href="<?= base_url('invoice/payments/history/' . $invoiceId) ?>" class="btn-ribbon-utility">
+                            📜 Payment History
+                        </a>
+                    <?php endif; ?>
+
+                    <button type="button" class="btn-ribbon-utility" onclick="window.print()">
+                        🖨️ PDF / Print
+                    </button>
                 </div>
             </div>
 
             <div class="whats-next-banner">
                 <div class="banner-text-side">
-                    <strong>✨ WHAT'S NEXT?</strong>
-                    Mark the payment as Paid to confirm that it has been received and closed.
+                    <strong>PAYMENT STATUS</strong>
+                    <?= esc($customerName) ?> के invoice
+                    <b><?= esc($invoiceNumber) ?></b>
+                    में ₹<?= number_format($paidAmount, 2) ?> received और
+                    ₹<?= number_format($balanceDue, 2) ?> pending है.
                 </div>
+
                 <div>
-                    <a href="#" class="btn-action-paid-trigger" onclick="alert('Status confirmed successfully!')">Mark as Paid</a>
+                    <?php if ($status == 'paid'): ?>
+                        <span class="btn-action-paid-trigger" style="background:#16a34a;border-color:#16a34a;">
+                            Paid
+                        </span>
+                    <?php else: ?>
+                        <a href="<?= base_url('invoice/payments/create-for-invoice/' . $invoiceId) ?>" class="btn-action-paid-trigger">
+                            Receive Payment
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
 
             <div class="canvas-scroll-container">
                 <div class="receipt-a4-sheet">
-                    
-                    <div class="draft-corner-tag">Draft</div>
+
+                    <div class="draft-corner-tag <?= $statusClass ?>">
+                        <?= esc(str_replace('_', ' ', $status)) ?>
+                    </div>
 
                     <div class="sheet-header-flex">
                         <div class="brand-identity-box">
@@ -353,7 +485,10 @@
                                 bhattinikhil530@gmail.com
                             </div>
                         </div>
-                        <div class="sheet-main-title">Payment Receipt</div>
+
+                        <div class="sheet-main-title">
+                            Invoice Payment Ledger
+                        </div>
                     </div>
 
                     <hr style="border: 0; border-top: 1px solid #f1f5f9; margin-bottom: 20px;">
@@ -362,74 +497,144 @@
                         <div>
                             <table class="matrix-data-table">
                                 <tr>
-                                    <td>Payment Date</td>
-                                    <td><strong><?= date('d/m/Y', strtotime($current_p['payment_date'])) ?></strong></td>
+                                    <td>Invoice Number</td>
+                                    <td><strong><?= esc($invoiceNumber) ?></strong></td>
                                 </tr>
+
                                 <tr>
-                                    <td>Reference Number</td>
-                                    <td><strong><?= !empty($current_p['reference']) ? esc($current_p['reference']) : '--' ?></strong></td>
+                                    <td>Customer</td>
+                                    <td><strong><?= esc($customerName) ?></strong></td>
                                 </tr>
+
                                 <tr>
-                                    <td>Payment Mode</td>
-                                    <td><strong><?= esc(ucfirst($current_p['payment_mode'])) ?></strong></td>
+                                    <td>Last Payment</td>
+                                    <td>
+                                        <strong>
+                                            <?= !empty($lastPayDate) ? date('d/m/Y', strtotime($lastPayDate)) : '--' ?>
+                                        </strong>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Total Payments</td>
+                                    <td><strong><?= $paymentCount ?></strong></td>
+                                </tr>
+
+                                <tr>
+                                    <td>Status</td>
+                                    <td>
+                                        <strong class="<?= $statusClass ?>">
+                                            <?= esc(str_replace('_', ' ', strtoupper($status))) ?>
+                                        </strong>
+                                    </td>
                                 </tr>
                             </table>
                         </div>
 
                         <div class="zoho-green-amount-box">
                             <div class="green-box-label">Amount Received</div>
-                            <div class="green-box-sum">₹<?= number_format($current_p['amount'], 2) ?></div>
+                            <div class="green-box-sum">
+                                ₹<?= number_format($paidAmount, 2) ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-grid">
+                        <div class="summary-box">
+                            <div class="summary-label">Invoice Total</div>
+                            <div class="summary-value">₹<?= number_format($invoiceTotal, 2) ?></div>
+                        </div>
+
+                        <div class="summary-box">
+                            <div class="summary-label">Paid Amount</div>
+                            <div class="summary-value" style="color:#16a34a;">
+                                ₹<?= number_format($paidAmount, 2) ?>
+                            </div>
+                        </div>
+
+                        <div class="summary-box">
+                            <div class="summary-label">Balance Due</div>
+                            <div class="summary-value" style="color:#dc2626;">
+                                ₹<?= number_format($balanceDue, 2) ?>
+                            </div>
                         </div>
                     </div>
 
                     <div style="margin-top: 45px; max-width: 350px;">
-                        <div style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Bill To</div>
-                        <div style="font-weight: 600; font-size: 14px; color: #2563eb;"><?= esc($current_p['cname']) ?></div>
+                        <div style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                            Bill To
+                        </div>
+
+                        <div style="font-weight: 600; font-size: 14px; color: #2563eb;">
+                            <?= esc($customerName) ?>
+                        </div>
+
                         <div style="font-size: 13px; color: #475569; margin-top: 2px; line-height: 1.4;">
                             Individual Account / Corporate Customer
                         </div>
                     </div>
 
-                    <div class="allocation-header-title">Payment For:</div>
+                    <div class="allocation-header-title">Invoice Payment Summary</div>
+
                     <table class="allocation-grid-table">
                         <thead>
                             <tr>
-                                <th style="width: 50%;">Invoice Number</th>
-                                <th style="text-align: right; width: 25%;">Invoice Amount</th>
-                                <th style="text-align: right; width: 25%;">Payment Amount</th>
+                                <th style="width: 35%;">Invoice Number</th>
+                                <th style="text-align: right; width: 20%;">Invoice Amount</th>
+                                <th style="text-align: right; width: 20%;">Received</th>
+                                <th style="text-align: right; width: 20%;">Pending</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             <tr>
                                 <td style="font-weight: 600; color: #0f172a;">
-                                    <?php if(!empty($current_p['invoice_number'])): ?>
-                                        <span style="color:#2563eb;">
-                                            <?= esc($current_p['invoice_number']) ?>
-                                        </span>
-                                    <?php else: ?>
-                                        <span style="color: #94a3b8; font-style: italic;">Unallocated Advance / Credit</span>
-                                    <?php endif; ?>
+                                    <span style="color:#2563eb;">
+                                        <?= esc($invoiceNumber) ?>
+                                    </span>
                                 </td>
-                                <td style="text-align: right;">₹<?= number_format($current_p['amount'], 2) ?></td>
-                                <td style="text-align: right; font-weight: 600; color: #111827;">₹<?= number_format($current_p['amount'], 2) ?></td>
+
+                                <td style="text-align: right;">
+                                    ₹<?= number_format($invoiceTotal, 2) ?>
+                                </td>
+
+                                <td style="text-align: right; font-weight: 600; color: #16a34a;">
+                                    ₹<?= number_format($paidAmount, 2) ?>
+                                </td>
+
+                                <td style="text-align: right; font-weight: 600; color: #dc2626;">
+                                    ₹<?= number_format($balanceDue, 2) ?>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
 
+                    <div style="margin-top: 35px;">
+                        <?php if (!empty($invoiceId)): ?>
+                            <a href="<?= base_url('invoice/payments/history/' . $invoiceId) ?>"
+                               style="display:inline-block;background:#0f172a;color:#fff;padding:9px 14px;border-radius:5px;text-decoration:none;font-size:13px;">
+                                View Full Payment History
+                            </a>
+                        <?php endif; ?>
+                    </div>
+
                     <div style="margin-top: 120px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-                        Thank you for your business! This is a system generated payment receipt by slysis.
+                        Thank you for your business! This is a system generated invoice payment ledger by slysis.
                     </div>
 
                 </div>
             </div>
+
         <?php else: ?>
+
             <div class="empty-center-state">
                 <i class="bi bi-inbox" style="font-size: 32px; margin-bottom: 10px; color:#cbd5e1;"></i>
-                No payments records selected or available to preview.
+                No payment records selected or available to preview.
             </div>
-        <?php endif; ?>
-    </div>
 
+        <?php endif; ?>
+
+    </div>
 </div>
 
 <?= $this->endSection() ?>

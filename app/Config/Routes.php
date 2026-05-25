@@ -374,7 +374,17 @@ $routes->group('invoice', ['namespace' => 'App\Controllers\Invoice'], function($
         'Payments::createForInvoice/$1'
     );
 
+    $routes->get(
+        'payments/create-for-invoice/(:num)',
+        'Payments::createForInvoice/$1'
+    );
+
     $routes->post('payments/store', 'Payments::store');
+
+    $routes->get(
+        'payments/history/(:num)',
+        'Payments::history/$1'
+    );
 
     $routes->get(
         'payments/show/(:num)',

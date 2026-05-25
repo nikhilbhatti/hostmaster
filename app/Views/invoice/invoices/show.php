@@ -189,27 +189,93 @@ $total_words = numToWordsINR($inv['total']);
 
 <!-- ── TOP BAR ── -->
 <div class="inv-topbar no-print">
-    <h4 style="font-size:17px;font-weight:700"><?= esc($inv['invoice_number']) ?></h4>
+
+    <h4 style="font-size:17px;font-weight:700">
+        <?= esc($inv['invoice_number']) ?>
+    </h4>
+
     <div style="display:flex;gap:7px;align-items:center">
-        <?php if($inv['status']!=='paid'): ?>
-        <a href="<?= base_url('invoice/payments/create/'.$inv['id']) ?>" class="btn btn-success"><i class="bi bi-credit-card"></i> Record Payment</a>
+
+        <?php if($inv['status'] !== 'paid'): ?>
+
+            <a href="<?= base_url('invoice/payments/create-for-invoice/'.$inv['id']) ?>"
+               class="btn btn-success">
+
+                <i class="bi bi-credit-card"></i>
+                Record Payment
+            </a>
+
         <?php endif; ?>
-        <a href="<?= base_url('invoice/invoices/edit/'.$inv['id']) ?>" class="btn btn-outline"><i class="bi bi-pencil"></i> Edit</a>
+
+        <a href="<?= base_url('invoice/payments/history/'.$inv['id']) ?>"
+           class="btn btn-outline">
+
+            <i class="bi bi-clock-history"></i>
+            Payment History
+        </a>
+
+        <a href="<?= base_url('invoice/invoices/edit/'.$inv['id']) ?>"
+           class="btn btn-outline">
+
+            <i class="bi bi-pencil"></i>
+            Edit
+        </a>
+
         <div class="zdrop" id="pdfDrop">
-            <button type="button" class="btn btn-outline" onclick="event.stopPropagation();this.closest('.zdrop').classList.toggle('show')">
-                <i class="bi bi-file-earmark-pdf"></i> PDF/Print <i class="bi bi-chevron-down" style="font-size:10px"></i>
+
+            <button type="button"
+                    class="btn btn-outline"
+                    onclick="event.stopPropagation();this.closest('.zdrop').classList.toggle('show')">
+
+                <i class="bi bi-file-earmark-pdf"></i>
+                PDF/Print
+
+                <i class="bi bi-chevron-down"
+                   style="font-size:10px"></i>
             </button>
+
             <div class="zdrop-menu">
-                <button type="button" onclick="event.stopPropagation();dlPDF()"><i class="bi bi-file-earmark-pdf" style="color:#dc2626"></i> Download PDF</button>
-                <button type="button" onclick="event.stopPropagation();window.print()"><i class="bi bi-printer"></i> Print Invoice</button>
+
+                <button type="button"
+                        onclick="event.stopPropagation();dlPDF()">
+
+                    <i class="bi bi-file-earmark-pdf"
+                       style="color:#dc2626"></i>
+
+                    Download PDF
+                </button>
+
+                <button type="button"
+                        onclick="event.stopPropagation();window.print()">
+
+                    <i class="bi bi-printer"></i>
+                    Print Invoice
+                </button>
+
                 <div class="zdrop-div"></div>
-                <button type="button" onclick="event.stopPropagation();dlExcel()"><i class="bi bi-file-earmark-excel" style="color:#16a34a"></i> Export to Excel</button>
+
+                <button type="button"
+                        onclick="event.stopPropagation();dlExcel()">
+
+                    <i class="bi bi-file-earmark-excel"
+                       style="color:#16a34a"></i>
+
+                    Export to Excel
+                </button>
+
             </div>
         </div>
-        <a href="<?= base_url('invoice/invoices') ?>" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Back</a>
-    </div>
-</div>
 
+        <a href="<?= base_url('invoice/invoices') ?>"
+           class="btn btn-outline">
+
+            <i class="bi bi-arrow-left"></i>
+            Back
+        </a>
+
+    </div>
+
+</div>
 <!-- ── STATUS BAR ── -->
 <div class="inv-statusbar no-print">
     <div><div class="s-lbl">Invoice Amount</div><div class="s-amt">₹<?= number_format($inv['total'],2) ?></div></div>
@@ -368,28 +434,80 @@ $total_words = numToWordsINR($inv['total']);
 </div><!-- #printArea -->
 
 <!-- Payments -->
-<?php if(!empty($payments)): ?>
 <div class="card no-print" style="margin-top:20px">
-    <div class="card-header"><h5>Payments Received</h5></div>
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <h5>Payments Received</h5>
+
+        <a href="<?= base_url('invoice/payments/history/'.$inv['id']) ?>" class="btn btn-outline">
+            View Full History
+        </a>
+    </div>
+
     <div class="table-wrap">
         <table class="ztable">
-            <thead><tr><th>Payment#</th><th>Date</th><th>Mode</th><th>Reference</th><th>Amount</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Payment#</th>
+                    <th>Date</th>
+                    <th>Mode</th>
+                    <th>Reference</th>
+                    <th style="text-align:right;">Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
             <tbody>
-            <?php foreach($payments as $p): ?>
-            <tr>
-                <td style="font-weight:600;color:#5065e8"><?= esc($p['payment_number']) ?></td>
-                <td><?= esc($p['payment_date']) ?></td>
-                <td><?= ucfirst(esc($p['payment_mode'])) ?></td>
-                <td><?= $p['reference']?esc($p['reference']):'-' ?></td>
-                <td style="color:#16a34a;font-weight:600">₹<?= number_format($p['amount'],2) ?></td>
-            </tr>
-            <?php endforeach; ?>
+            <?php if(!empty($payments)): ?>
+
+                <?php foreach($payments as $p): ?>
+                    <tr>
+                        <td style="font-weight:600;color:#5065e8">
+                            <?= esc($p['payment_number'] ?? '-') ?>
+                        </td>
+
+                        <td>
+                            <?= !empty($p['payment_date']) ? date('d/m/Y', strtotime($p['payment_date'])) : '-' ?>
+                        </td>
+
+                        <td>
+                            <?= esc(ucwords(str_replace('_', ' ', $p['payment_mode'] ?? '-'))) ?>
+                        </td>
+
+                        <td>
+                            <?= !empty($p['reference']) ? esc($p['reference']) : '-' ?>
+                        </td>
+
+                        <td style="color:#16a34a;font-weight:600;text-align:right;">
+                            ₹<?= number_format((float)($p['amount'] ?? 0), 2) ?>
+                        </td>
+
+                        <td>
+                            <a href="<?= base_url('invoice/payments/edit/'.$p['id']) ?>" style="color:#2563eb;font-weight:600;text-decoration:none;">
+                                Edit
+                            </a>
+                            |
+                            <a href="<?= base_url('invoice/payments/delete/'.$p['id']) ?>"
+                               onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')"
+                               style="color:#dc2626;font-weight:600;text-decoration:none;">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+
+            <?php else: ?>
+
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">
+                        No payments received for this invoice yet.
+                    </td>
+                </tr>
+
+            <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
-<?php endif; ?>
-
 <!-- ══════════════════════════════════════
      SETTINGS MODAL
 ══════════════════════════════════════════ -->

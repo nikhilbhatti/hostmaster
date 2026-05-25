@@ -43,73 +43,21 @@ textarea.zoho-control{height:auto;min-height:70px}
 .zoho-upload-container:hover{background:#f8fafc}
 .upload-trigger-text{color:#111827;font-size:15px;font-weight:500}
 .upload-limits-hint{font-size:13px;color:#64748b;margin-top:10px}
-
-.footer-action-bar{
-    position:sticky;
-    bottom:0;
-    background:#fff;
-    border-top:1px solid #e5e7eb;
-    padding:16px 28px;
-    display:flex;
-    gap:12px;
-    z-index:999;
-    margin-top:30px;
-    width:100%;
-    justify-content:flex-start;
-    align-items:center;
-    flex-wrap:wrap;
-    box-shadow:0 -2px 12px rgba(0,0,0,.05);
-}
-
-.btn-zoho-blue{
-    background:#4087f5;
-    color:#fff;
-    border:1px solid #4087f5;
-    padding:10px 18px;
-    border-radius:6px;
-    font-size:15px;
-    cursor:pointer;
-    font-weight:600;
-}
-
-.btn-zoho-white{
-    background:#fff;
-    color:#111827;
-    border:1px solid #d7deea;
-    padding:10px 18px;
-    border-radius:6px;
-    font-size:15px;
-    cursor:pointer;
-    font-weight:600;
-}
-
-.btn-zoho-cancel{
-    color:#111827;
-    padding:10px 8px;
-    text-decoration:none;
-    font-size:15px;
-    font-weight:500;
-}
-
-@media(max-width:900px){
-    .zoho-grid-row,
-    .zoho-split-layout{
-        grid-template-columns:1fr;
-    }
-
-    .footer-action-bar{
-        left:0;
-        padding:15px;
-        justify-content:center;
-    }
-
-    .btn-zoho-blue,
-    .btn-zoho-white{
-        width:100%;
-        text-align:center;
-    }
-}
+.footer-action-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e7eb;padding:16px 28px;display:flex;gap:12px;z-index:999;margin-top:30px;width:100%;justify-content:flex-start;align-items:center;flex-wrap:wrap;box-shadow:0 -2px 12px rgba(0,0,0,.05)}
+.btn-zoho-blue{background:#4087f5;color:#fff;border:1px solid #4087f5;padding:10px 18px;border-radius:6px;font-size:15px;cursor:pointer;font-weight:600}
+.btn-zoho-white{background:#fff;color:#111827;border:1px solid #d7deea;padding:10px 18px;border-radius:6px;font-size:15px;cursor:pointer;font-weight:600}
+.btn-zoho-cancel{color:#111827;padding:10px 8px;text-decoration:none;font-size:15px;font-weight:500}
+@media(max-width:900px){.zoho-grid-row,.zoho-split-layout{grid-template-columns:1fr}.footer-action-bar{left:0;padding:15px;justify-content:center}.btn-zoho-blue,.btn-zoho-white{width:100%;text-align:center}}
 </style>
+
+<?php
+$selectedCustomerId = $invoice['customer_id'] ?? '';
+$selectedCustomerName = $invoice['cname'] ?? '';
+$selectedInvoiceId = $invoice['id'] ?? '';
+$selectedBalance = $invoice['balance_due'] ?? 0;
+$selectedTotal = $invoice['total'] ?? 0;
+$selectedInvoiceNumber = $invoice['invoice_number'] ?? '';
+?>
 
 <div class="zoho-wrapper">
     <div class="zoho-heading">Record Payment</div>
@@ -117,12 +65,14 @@ textarea.zoho-control{height:auto;min-height:70px}
     <form method="POST" action="<?= base_url('invoice/payments/store') ?>" class="zoho-form-body" enctype="multipart/form-data">
         <?= csrf_field() ?>
 
+        <input type="hidden" name="invoice_id" id="invoice_id" value="<?= esc($selectedInvoiceId) ?>">
+
         <div class="zoho-grid-row">
             <div class="zoho-label">Customer Name<span class="required">*</span></div>
             <div class="zoho-input-container">
                 <div class="zoho-search-select-container">
-                    <input type="text" id="customer_search_trigger" class="zoho-control search-input-trigger" placeholder="Select a Customer" readonly onclick="toggleSearchDropdown()">
-                    <input type="hidden" name="customer_id" id="customer_id" required>
+                    <input type="text" id="customer_search_trigger" class="zoho-control search-input-trigger" placeholder="Select a Customer" readonly onclick="toggleSearchDropdown()" value="<?= esc($selectedCustomerName) ?>">
+                    <input type="hidden" name="customer_id" id="customer_id" value="<?= esc($selectedCustomerId) ?>" required>
 
                     <div class="zoho-dropdown-menu" id="searchDropdownMenu">
                         <div class="dropdown-search-box-wrapper">
@@ -152,18 +102,9 @@ textarea.zoho-control{height:auto;min-height:70px}
             <div></div>
             <div class="zoho-input-container">
                 <div class="meta-panel-box">
-                    <div class="meta-block">
-                        <strong>Email Address</strong>
-                        <span id="meta_email">--</span>
-                    </div>
-                    <div class="meta-block">
-                        <strong>Phone / Mobile</strong>
-                        <span id="meta_phone">--</span>
-                    </div>
-                    <div class="meta-block">
-                        <strong>Company</strong>
-                        <span id="meta_company">--</span>
-                    </div>
+                    <div class="meta-block"><strong>Email Address</strong><span id="meta_email">--</span></div>
+                    <div class="meta-block"><strong>Phone / Mobile</strong><span id="meta_phone">--</span></div>
+                    <div class="meta-block"><strong>Company</strong><span id="meta_company">--</span></div>
                 </div>
             </div>
         </div>
@@ -173,7 +114,7 @@ textarea.zoho-control{height:auto;min-height:70px}
             <div class="zoho-input-container">
                 <div style="position:relative;display:flex;align-items:center;">
                     <span style="position:absolute;left:12px;color:#64748b;">INR</span>
-                    <input type="number" name="amount" id="amount_received" class="zoho-control" step="0.01" value="0.00" style="padding-left:45px;" required oninput="distributeAmountAndCalc()">
+                    <input type="number" name="amount" id="amount_received" class="zoho-control" step="0.01" min="0" value="<?= !empty($selectedBalance) ? number_format((float)$selectedBalance, 2, '.', '') : '0.00' ?>" style="padding-left:45px;" required oninput="distributeAmountAndCalc()">
                 </div>
             </div>
         </div>
@@ -181,7 +122,7 @@ textarea.zoho-control{height:auto;min-height:70px}
         <div class="zoho-grid-row">
             <div class="zoho-label">Bank Charges (if any)</div>
             <div class="zoho-input-container">
-                <input type="number" name="bank_charges" id="bank_charges" class="zoho-control" step="0.01" value="0.00" oninput="calculateSummaryPanel()">
+                <input type="number" name="bank_charges" id="bank_charges" class="zoho-control" step="0.01" min="0" value="0.00" oninput="calculateSummaryPanel()">
             </div>
         </div>
 
@@ -193,10 +134,10 @@ textarea.zoho-control{height:auto;min-height:70px}
         </div>
 
         <div class="zoho-grid-row">
-            <div class="zoho-label">Payment #<span class="required">*</span></div>
+            <div class="zoho-label">Payment #</div>
             <div class="zoho-input-container">
                 <div class="zoho-input-group-gear">
-                    <input type="text" name="payment_number" id="payment_number" class="zoho-control" value="1" required style="padding-right:35px;">
+                    <input type="text" name="payment_number" id="payment_number" class="zoho-control" value="Auto Generated" readonly style="padding-right:35px;background:#f8fafc;">
                     <button type="button" class="gear-setting-btn">⚙️</button>
                 </div>
             </div>
@@ -206,11 +147,12 @@ textarea.zoho-control{height:auto;min-height:70px}
             <div class="zoho-label">Payment Mode</div>
             <div class="zoho-input-container">
                 <select name="payment_mode" id="payment_mode" class="zoho-control">
-                    <option value="Cash">Cash</option>
-                    <option value="Bank Remittance">Bank Remittance</option>
-                    <option value="Bank Transfer">Bank Transfer</option>
-                    <option value="Cheque">Cheque</option>
-                    <option value="Credit Card">Credit Card</option>
+                    <option value="cash">Cash</option>
+                    <option value="bank_remittance">Bank Remittance</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="cheque">Cheque</option>
+                    <option value="credit_card">Credit Card</option>
+                    <option value="upi">UPI</option>
                 </select>
             </div>
         </div>
@@ -243,11 +185,32 @@ textarea.zoho-control{height:auto;min-height:70px}
                     </tr>
                 </thead>
                 <tbody id="unpaidInvoicesBody">
-                    <tr>
-                        <td colspan="5" style="text-align:center;padding:40px;color:#64748b;">
-                            There are no unpaid invoices associated with this customer.
-                        </td>
-                    </tr>
+                    <?php if(!empty($invoice)): ?>
+                        <tr>
+                            <td><?= !empty($invoice['invoice_date']) ? date('d/m/Y', strtotime($invoice['invoice_date'])) : '-' ?></td>
+                            <td style="font-weight:600;color:#2563eb;"><?= esc($selectedInvoiceNumber) ?></td>
+                            <td style="text-align:right;">₹<?= number_format((float)$selectedTotal, 2) ?></td>
+                            <td style="text-align:right;color:#dc2626;">₹<?= number_format((float)$selectedBalance, 2) ?></td>
+                            <td style="text-align:right;">
+                                <input type="number"
+                                    name="allocated_amount[<?= esc($selectedInvoiceId) ?>]"
+                                    class="zoho-control invoice-allocation-input"
+                                    style="text-align:right;max-width:140px;display:inline-block;"
+                                    step="0.01"
+                                    min="0"
+                                    max="<?= esc($selectedBalance) ?>"
+                                    data-due="<?= esc($selectedBalance) ?>"
+                                    value="<?= number_format((float)$selectedBalance, 2, '.', '') ?>"
+                                    oninput="calculateTotalFromGrid()">
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" style="text-align:center;padding:40px;color:#64748b;">
+                                There are no unpaid invoices associated with this customer.
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -271,37 +234,17 @@ textarea.zoho-control{height:auto;min-height:70px}
             </div>
 
             <div class="summary-card">
-                <div class="summary-row">
-                    <span>Amount Received :</span>
-                    <span id="summary_received">0.00</span>
-                </div>
-                <div class="summary-row">
-                    <span>Amount used for Payments :</span>
-                    <span id="summary_used">0.00</span>
-                </div>
-                <div class="summary-row">
-                    <span>Amount Refunded :</span>
-                    <span>0.00</span>
-                </div>
-                <div class="excess-alert-row">
-                    <span>⚠️ Amount in Excess:</span>
-                    <span id="summary_excess">₹ 0.00</span>
-                </div>
+                <div class="summary-row"><span>Amount Received :</span><span id="summary_received">0.00</span></div>
+                <div class="summary-row"><span>Amount used for Payments :</span><span id="summary_used">0.00</span></div>
+                <div class="summary-row"><span>Amount Refunded :</span><span>0.00</span></div>
+                <div class="excess-alert-row"><span>⚠️ Amount in Excess:</span><span id="summary_excess">₹ 0.00</span></div>
             </div>
         </div>
 
         <div class="footer-action-bar">
-            <button type="submit" name="status" value="draft" class="btn-zoho-white">
-                Save as Draft
-            </button>
-
-            <button type="submit" name="status" value="paid" class="btn-zoho-blue">
-                Save as Paid
-            </button>
-
-            <a href="<?= base_url('invoice/payments') ?>" class="btn-zoho-cancel">
-                Cancel
-            </a>
+            <button type="submit" name="save_status" value="draft" class="btn-zoho-white">Save as Draft</button>
+            <button type="submit" name="save_status" value="paid" class="btn-zoho-blue">Save as Paid</button>
+            <a href="<?= base_url('invoice/payments') ?>" class="btn-zoho-cancel">Cancel</a>
         </div>
     </form>
 </div>
@@ -319,7 +262,7 @@ function toggleSearchDropdown() {
 
 document.addEventListener('click', function(event) {
     const container = document.querySelector('.zoho-search-select-container');
-    if (!container.contains(event.target)) {
+    if (container && !container.contains(event.target)) {
         document.getElementById('searchDropdownMenu').style.display = 'none';
     }
 });
@@ -337,6 +280,7 @@ function selectCustomerOption(element) {
 
     document.getElementById('customer_search_trigger').value = name;
     document.getElementById('customer_id').value = id;
+    document.getElementById('invoice_id').value = '';
     document.getElementById('searchDropdownMenu').style.display = 'none';
 
     onCustomerChange(id);
@@ -344,7 +288,6 @@ function selectCustomerOption(element) {
 
 function onCustomerChange(customerId) {
     if (!customerId) return;
-
     fetchCustomerMeta(customerId);
     fetchUnpaidInvoices(customerId);
 }
@@ -361,6 +304,13 @@ function fetchCustomerMeta(customerId) {
             }
         })
         .catch(err => console.error(err));
+}
+
+function formatDateDMY(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
 }
 
 function fetchUnpaidInvoices(customerId) {
@@ -381,16 +331,18 @@ function fetchUnpaidInvoices(customerId) {
                 data.forEach(inv => {
                     tbody.insertAdjacentHTML('beforeend', `
                         <tr>
-                            <td>${inv.invoice_date}</td>
+                            <td>${formatDateDMY(inv.invoice_date)}</td>
                             <td style="font-weight:600;color:#2563eb;">${inv.invoice_number}</td>
-                            <td style="text-align:right;">₹${parseFloat(inv.total).toFixed(2)}</td>
-                            <td style="text-align:right;color:#dc2626;">₹${parseFloat(inv.balance_due).toFixed(2)}</td>
+                            <td style="text-align:right;">₹${parseFloat(inv.total || 0).toFixed(2)}</td>
+                            <td style="text-align:right;color:#dc2626;">₹${parseFloat(inv.balance_due || 0).toFixed(2)}</td>
                             <td style="text-align:right;">
                                 <input type="number"
                                     name="allocated_amount[${inv.id}]"
                                     class="zoho-control invoice-allocation-input"
                                     style="text-align:right;max-width:140px;display:inline-block;"
                                     step="0.01"
+                                    min="0"
+                                    max="${inv.balance_due}"
                                     data-due="${inv.balance_due}"
                                     value="0.00"
                                     oninput="calculateTotalFromGrid()">
@@ -398,6 +350,8 @@ function fetchUnpaidInvoices(customerId) {
                         </tr>
                     `);
                 });
+
+                distributeAmountAndCalc();
             }
 
             calculateSummaryPanel();
@@ -429,7 +383,15 @@ function calculateTotalFromGrid() {
     let sum = 0;
 
     document.querySelectorAll('.invoice-allocation-input').forEach(input => {
-        sum += parseFloat(input.value) || 0;
+        let val = parseFloat(input.value) || 0;
+        let due = parseFloat(input.getAttribute('data-due')) || 0;
+
+        if (val > due) {
+            val = due;
+            input.value = due.toFixed(2);
+        }
+
+        sum += val;
     });
 
     document.getElementById('amount_received').value = sum.toFixed(2);
@@ -465,11 +427,27 @@ function handleFileSelectionDisplay(input) {
 
     let names = [];
     for (let i = 0; i < files.length; i++) {
+        if (files[i].size > 5 * 1024 * 1024) {
+            alert('Each file must be less than 5MB.');
+            input.value = '';
+            previewDiv.innerHTML = '';
+            return;
+        }
         names.push(files[i].name);
     }
 
     previewDiv.innerText = 'Selected: ' + names.join(', ');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const selectedCustomer = document.getElementById('customer_id').value;
+
+    if (selectedCustomer) {
+        fetchCustomerMeta(selectedCustomer);
+    }
+
+    calculateSummaryPanel();
+});
 </script>
 
 <?= $this->endSection() ?>
