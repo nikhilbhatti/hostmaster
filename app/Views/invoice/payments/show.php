@@ -264,7 +264,7 @@ input[type="checkbox"]{
 
                         <td>
 
-                            <a href="<?= base_url('invoice/payments?active_id=' . $invoiceId) ?>"
+                            <a href="<?= base_url('invoice/invoices/show/' . $invoiceId) ?>"
                                class="payment-link"
                                onclick="event.stopPropagation();">
 
