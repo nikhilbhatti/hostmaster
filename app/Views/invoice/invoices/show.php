@@ -379,6 +379,7 @@ $total_words = numToWordsINR($inv['total']);
                     <th id="th-item">Item &amp; Description</th>
                     <th style="width:68px;text-align:right" id="th-qty">Qty</th>
                     <th style="width:88px;text-align:right" id="th-rate">Rate</th>
+                    <th style="width:105px;text-align:right" id="th-hsn">HSN/SAC</th>
                     <th style="width:105px;text-align:right" id="th-amt">Amount</th>
                 </tr>
             </thead>
@@ -389,6 +390,7 @@ $total_words = numToWordsINR($inv['total']);
                 <td><div class="it-name"><?= esc($item['item_name']) ?></div><?php if($item['description']): ?><div class="it-desc"><?= esc($item['description']) ?></div><?php endif; ?></td>
                 <td style="text-align:right"><?= number_format($item['qty'],2) ?></td>
                 <td style="text-align:right"><?= number_format($item['rate'],2) ?></td>
+                <td style="text-align:right"><?= esc($item['hsn_sac'] ?? '') ?></td>
                 <td style="text-align:right"><?= number_format($item['amount'],2) ?></td>
             </tr>
             <?php endforeach; ?>
@@ -918,11 +920,11 @@ function dlExcel() {
     const rows = [
         ['TAX INVOICE'], ['Invoice#', '<?= esc($inv["invoice_number"]) ?>'], ['Date', '<?= date("d/m/Y", strtotime($inv["invoice_date"])) ?>'],
         ['Due Date', '<?= date("d/m/Y", strtotime($inv["due_date"])) ?>'], ['Customer', '<?= esc($inv["cname"]) ?>'], [],
-        ['#', 'Item', 'Qty', 'Rate', 'Amount']
+        ['#', 'Item', 'Qty', 'Rate', 'HSN/SAC', 'Amount']
     ];
     document.querySelectorAll('#itmTbl tbody tr').forEach((tr, i) => {
         const td = tr.querySelectorAll('td');
-        if (td.length >= 5) rows.push([i+1, td[1].innerText.trim(), td[2].innerText.trim(), td[3].innerText.trim(), td[4].innerText.trim()]);
+        if (td.length >= 6) rows.push([i+1, td[1].innerText.trim(), td[2].innerText.trim(), td[3].innerText.trim(), td[4].innerText.trim(), td[5].innerText.trim()]);
     });
     rows.push([], ['','','','Sub Total','₹<?= number_format($inv["sub_total"],2) ?>'], ['','','','Tax','₹<?= number_format($inv["tax_total"],2) ?>'], ['','','','Total','₹<?= number_format($inv["total"],2) ?>'], ['','','','Balance Due','₹<?= number_format($inv["balance_due"],2) ?>']);
     const ws = XLSX.utils.aoa_to_sheet(rows);
