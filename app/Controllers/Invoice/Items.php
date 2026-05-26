@@ -69,4 +69,54 @@ class Items extends BaseController
     {
         return $this->response->setJSON($this->m->find($id));
     }
+    public function ajaxStore()
+{
+    $data = [
+
+        'item_type' => $this->request->getPost('item_type'),
+
+        'name' => $this->request->getPost('name'),
+
+        'sku' => $this->request->getPost('sku'),
+
+        'hsn_sac' => $this->request->getPost('hsn_sac'),
+
+        'unit' => $this->request->getPost('unit'),
+
+        'description' => $this->request->getPost('description'),
+
+        'selling_price' => $this->request->getPost('selling_price'),
+
+        'purchase_price' => 0,
+
+        'tax_id' => $this->request->getPost('tax_id'),
+
+        'status' => 1
+    ];
+
+    /* AUTO SKU */
+    if (empty($data['sku'])) {
+
+        $last = $this->m
+            ->orderBy('id', 'DESC')
+            ->first();
+
+        $num = $last ? ($last['id'] + 1) : 1;
+
+        $data['sku'] = 'SKU-' . str_pad($num, 5, '0', STR_PAD_LEFT);
+    }
+
+    $this->m->insert($data);
+
+    $id = $this->m->getInsertID();
+
+    $item = $this->m->find($id);
+
+    return $this->response->setJSON([
+
+        'success' => true,
+
+        'item' => $item
+    ]);
+}
 }

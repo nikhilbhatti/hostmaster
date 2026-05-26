@@ -204,8 +204,18 @@
 <div class="card" style="margin-bottom:16px;">
     <div style="padding:14px 20px; border-bottom:1px solid #e8eaed; display:flex; align-items:center; justify-content:space-between;">
         <span style="font-size:14px; font-weight:600;">Item Table</span>
-        <button type="button" onclick="addRow()" class="btn btn-outline btn-sm"><i class="bi bi-plus"></i> Add Line</button>
+
+        <div style="display:flex;gap:8px;align-items:center;">
+            <button type="button" onclick="openNewItemModalForTable()" class="btn btn-outline btn-sm">
+                <i class="bi bi-plus-circle"></i> New Item
+            </button>
+
+            <button type="button" onclick="addRow()" class="btn btn-outline btn-sm">
+                <i class="bi bi-plus"></i> Add Line
+            </button>
+        </div>
     </div>
+
     <div style="overflow-x:auto;">
         <table class="items-tbl" id="itemsTable">
             <thead>
@@ -221,9 +231,11 @@
                     <th style="width:36px;"></th>
                 </tr>
             </thead>
+
             <tbody id="liTbody"></tbody>
         </table>
     </div>
+
     <div style="padding:10px 20px; border-top:1px solid #f5f5f5;">
         <button type="button" onclick="addRow()" style="background:none;border:none;color:#5065e8;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px;">
             <i class="bi bi-plus-circle"></i> Add Another Line
@@ -283,12 +295,319 @@
 </div>
 
 </form>
+<div id="newItemModal"
+     style="
+        display:none;
+        position:fixed;
+        inset:0;
+        background:rgba(15,23,42,.45);
+        z-index:9999;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+     ">
 
+    <div style="
+            background:#fff;
+            width:720px;
+            max-width:100%;
+            border-radius:14px;
+            overflow:hidden;
+            box-shadow:0 20px 45px rgba(0,0,0,.18);
+         ">
+
+        <!-- HEADER -->
+        <div style="
+                padding:18px 24px;
+                border-bottom:1px solid #eef1f6;
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+             ">
+
+            <div>
+                <div style="
+                        font-size:24px;
+                        font-weight:700;
+                        color:#111827;
+                        margin-bottom:2px;
+                     ">
+                    New Item
+                </div>
+
+                <div style="
+                        font-size:13px;
+                        color:#6b7280;
+                     ">
+                    Create a new item for invoice
+                </div>
+            </div>
+
+            <button type="button"
+                    onclick="closeNewItemModal()"
+
+                    style="
+                        border:none;
+                        background:#f3f4f6;
+                        width:34px;
+                        height:34px;
+                        border-radius:8px;
+                        cursor:pointer;
+                        font-size:18px;
+                     ">
+                ×
+            </button>
+        </div>
+
+        <!-- BODY -->
+        <div style="padding:24px;">
+
+            <!-- TOP GRID -->
+            <div style="
+                    display:grid;
+                    grid-template-columns:1fr 1fr;
+                    gap:18px;
+                    margin-bottom:18px;
+                 ">
+
+                <!-- ITEM TYPE -->
+                <div>
+                    <label style="
+                            font-size:13px;
+                            font-weight:600;
+                            color:#374151;
+                            margin-bottom:7px;
+                            display:block;
+                         ">
+                        Item Type
+                    </label>
+
+                    <select id="new_item_type"
+                            class="form-control">
+
+                        <option value="product">
+                            Product
+                        </option>
+
+                        <option value="service">
+                            Service
+                        </option>
+
+                    </select>
+                </div>
+
+                <!-- ITEM NAME -->
+                <div>
+                    <label style="
+                            font-size:13px;
+                            font-weight:600;
+                            color:#374151;
+                            margin-bottom:7px;
+                            display:block;
+                         ">
+                        Item Name *
+                    </label>
+
+                    <input id="new_item_name"
+                           class="form-control"
+                           placeholder="Enter item name">
+                </div>
+            </div>
+
+            <!-- SECOND GRID -->
+            <div style="
+                    display:grid;
+                    grid-template-columns:1fr 1fr 1fr;
+                    gap:18px;
+                    margin-bottom:18px;
+                 ">
+
+                <!-- SKU -->
+                <div>
+                    <label style="
+                            font-size:13px;
+                            font-weight:600;
+                            color:#374151;
+                            margin-bottom:7px;
+                            display:block;
+                         ">
+                        SKU
+                    </label>
+
+                    <input id="new_item_sku"
+                           class="form-control"
+                           placeholder="AUTO">
+                </div>
+
+                <!-- UNIT -->
+                <div>
+                    <label style="
+                            font-size:13px;
+                            font-weight:600;
+                            color:#374151;
+                            margin-bottom:7px;
+                            display:block;
+                         ">
+                        Unit
+                    </label>
+
+                    <select id="new_item_unit"
+                            class="form-control">
+
+                        <option value="PCS">PCS</option>
+                        <option value="KG">KG</option>
+                        <option value="G">G</option>
+                        <option value="LTR">LTR</option>
+                        <option value="ML">ML</option>
+                        <option value="M">M</option>
+                        <option value="CM">CM</option>
+                        <option value="HRS">HRS</option>
+                        <option value="DAYS">DAYS</option>
+                        <option value="BOX">BOX</option>
+                        <option value="DOZEN">DOZEN</option>
+
+                    </select>
+                </div>
+
+                <!-- TAX -->
+                <div>
+                    <label style="
+                            font-size:13px;
+                            font-weight:600;
+                            color:#374151;
+                            margin-bottom:7px;
+                            display:block;
+                         ">
+                        Tax
+                    </label>
+
+                    <select id="new_item_tax_id"
+                            class="form-control">
+
+                        <option value="">
+                            None
+                        </option>
+
+                        <?php foreach($taxes as $t): ?>
+
+                            <option value="<?= $t['id'] ?>">
+                                <?= esc($t['name']) ?>
+                                (<?= esc($t['rate']) ?>%)
+                            </option>
+
+                        <?php endforeach; ?>
+
+                    </select>
+                </div>
+            </div>
+
+            <!-- THIRD GRID -->
+            <div style="
+                    display:grid;
+                    grid-template-columns:1fr 1fr;
+                    gap:18px;
+                    margin-bottom:18px;
+                 ">
+
+                <!-- SELLING -->
+                <div>
+                    <label style="
+                            font-size:13px;
+                            font-weight:600;
+                            color:#374151;
+                            margin-bottom:7px;
+                            display:block;
+                         ">
+                        Selling Price *
+                    </label>
+
+                    <input id="new_item_rate"
+                           type="number"
+                           class="form-control"
+                           placeholder="0.00">
+                </div>
+
+                <!-- HSN -->
+                <div>
+                    <label style="
+                            font-size:13px;
+                            font-weight:600;
+                            color:#374151;
+                            margin-bottom:7px;
+                            display:block;
+                         ">
+                        HSN / SAC
+                    </label>
+
+                    <input id="new_item_hsn_sac"
+                           class="form-control"
+                           placeholder="HSN/SAC Number">
+                </div>
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div style="margin-bottom:20px;">
+
+                <label style="
+                        font-size:13px;
+                        font-weight:600;
+                        color:#374151;
+                        margin-bottom:7px;
+                        display:block;
+                     ">
+                    Description
+                </label>
+
+                <textarea id="new_item_desc"
+                          class="form-control"
+
+                          placeholder="Item description..."
+
+                          style="
+                            min-height:110px;
+                            resize:vertical;
+                          "></textarea>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div style="
+                padding:18px 24px;
+                border-top:1px solid #eef1f6;
+                display:flex;
+                justify-content:flex-end;
+                gap:10px;
+                background:#fafbfc;
+             ">
+
+            <button type="button"
+                    class="btn btn-outline"
+                    onclick="closeNewItemModal()">
+
+                Cancel
+
+            </button>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    onclick="saveNewItemFromInvoice()">
+
+                Save Item
+
+            </button>
+
+        </div>
+
+    </div>
+</div>
 <script>
-const _items = <?= json_encode($items) ?>;
+let _items = <?= json_encode($items) ?>;
 const _taxes = <?= json_encode($taxes) ?>;
 
-/* ── Fix 1: Submit with correct action ── */
+let currentNewItemRow = null;
+
+/* ── Submit with correct action ── */
 function submitInvoice(action) {
     document.getElementById('inv_action').value = action;
     document.getElementById('invoiceForm').submit();
@@ -304,55 +623,93 @@ function toggleCustList() {
 function filterCustomers(q) {
     q = q.toLowerCase();
     document.querySelectorAll('#custOptions .cd-item').forEach(el => {
-        const match = el.dataset.name.toLowerCase().includes(q) || el.dataset.email.toLowerCase().includes(q);
+        const name = (el.dataset.name || '').toLowerCase();
+        const email = (el.dataset.email || '').toLowerCase();
+        const match = name.includes(q) || email.includes(q);
         el.style.display = match ? '' : 'none';
     });
 }
 
 function selectCustomer(el) {
-    document.getElementById('custId').value      = el.dataset.id;
+    document.getElementById('custId').value = el.dataset.id;
     document.getElementById('custDisplay').value = el.dataset.name;
     document.getElementById('custList').classList.remove('open');
+
     document.querySelectorAll('#custOptions .cd-item').forEach(i => i.classList.remove('selected'));
     el.classList.add('selected');
 
-    const addr = [el.dataset.address1, el.dataset.address2, el.dataset.city, el.dataset.state, el.dataset.zip, el.dataset.country].filter(Boolean).join(', ');
-    document.getElementById('cp_name').textContent    = el.dataset.name;
-    document.getElementById('cp_addr').textContent    = addr || 'No address on file';
+    const addr = [
+        el.dataset.address1,
+        el.dataset.address2,
+        el.dataset.city,
+        el.dataset.state,
+        el.dataset.zip,
+        el.dataset.country
+    ].filter(Boolean).join(', ');
+
+    document.getElementById('cp_name').textContent = el.dataset.name;
+    document.getElementById('cp_addr').textContent = addr || 'No address on file';
     document.getElementById('cp_contact').textContent = [el.dataset.email, el.dataset.phone].filter(Boolean).join('  |  ');
 
     const gstinEl = document.getElementById('cp_gstin');
-    if (el.dataset.gstin) { gstinEl.textContent = 'GSTIN: ' + el.dataset.gstin; gstinEl.style.display = 'inline-block'; }
-    else { gstinEl.style.display = 'none'; }
 
-    const termsMap = { due_on_receipt:'Due on Receipt', net15:'Net 15', net30:'Net 30', net45:'Net 45', net60:'Net 60' };
+    if (el.dataset.gstin) {
+        gstinEl.textContent = 'GSTIN: ' + el.dataset.gstin;
+        gstinEl.style.display = 'inline-block';
+    } else {
+        gstinEl.style.display = 'none';
+    }
+
+    const termsMap = {
+        due_on_receipt: 'Due on Receipt',
+        net15: 'Net 15',
+        net30: 'Net 30',
+        net45: 'Net 45',
+        net60: 'Net 60'
+    };
+
     document.getElementById('cp_currency').textContent = el.dataset.currency ? 'Currency: ' + el.dataset.currency : '';
-    document.getElementById('cp_terms').textContent    = el.dataset.terms ? 'Terms: ' + (termsMap[el.dataset.terms] || el.dataset.terms) : '';
+    document.getElementById('cp_terms').textContent = el.dataset.terms ? 'Terms: ' + (termsMap[el.dataset.terms] || el.dataset.terms) : '';
     document.getElementById('custPanel').classList.add('show');
 
-    if (el.dataset.terms) { document.getElementById('payTerms').value = el.dataset.terms; updateDueDate(); }
+    if (el.dataset.terms) {
+        document.getElementById('payTerms').value = el.dataset.terms;
+        updateDueDate();
+    }
 }
 
 document.addEventListener('click', function(e) {
-    if (!e.target.closest('#custDropdown')) document.getElementById('custList').classList.remove('open');
+    if (!e.target.closest('#custDropdown')) {
+        document.getElementById('custList').classList.remove('open');
+    }
 });
 
 function updateDueDate() {
-    const terms   = document.getElementById('payTerms').value;
+    const terms = document.getElementById('payTerms').value;
     const invDate = document.getElementById('invoiceDate').value;
+
     if (!invDate) return;
-    const days = { due_on_receipt:0, net15:15, net30:30, net45:45, net60:60 };
+
+    const days = {
+        due_on_receipt: 0,
+        net15: 15,
+        net30: 30,
+        net45: 45,
+        net60: 60
+    };
+
     const d = new Date(invDate);
     d.setDate(d.getDate() + (days[terms] || 0));
     document.getElementById('dueDate').value = d.toISOString().split('T')[0];
 }
 
-/* ── Fix 2 & 3: Item row with HSN/SAC + searchable item dropdown ── */
+/* ── Item row with HSN/SAC + searchable item dropdown ── */
 let rowIdx = 0;
 
 function addRow(d = {}) {
     rowIdx++;
-    const ri    = rowIdx;
+
+    const ri = rowIdx;
     const tbody = document.getElementById('liTbody');
 
     const taxOpts = _taxes.map(t =>
@@ -366,7 +723,6 @@ function addRow(d = {}) {
 
     tr.innerHTML = `
     <td style="padding:10px 12px; min-width:220px;">
-        <!-- Fix 2: Searchable item input -->
         <div class="item-dropdown" id="idrop-${ri}">
             <input type="text" class="id-input iname-display"
                 placeholder="Type to search item..."
@@ -375,38 +731,49 @@ function addRow(d = {}) {
                 oninput="filterItems(${ri}, this.value)"
                 onfocus="openItemList(${ri})"
             >
+
             <div class="id-list" id="ilist-${ri}">
                 ${_items.map(i => `
-                <div class="id-opt"
-                    data-id="${i.id}"
-                    data-name="${i.name}"
-                    data-price="${i.selling_price ?? 0}"
-                    data-tax="${i.tax_id ?? ''}"
-                    data-hsn="${i.hsn_code ?? ''}"
-                    onclick="selectItem(${ri}, this)">
-                    ${i.name}
-                    <div class="id-opt-sub">${i.hsn_code ? 'HSN: ' + i.hsn_code : ''} ${i.selling_price ? '₹' + parseFloat(i.selling_price).toFixed(2) : ''}</div>
-                </div>`).join('')}
+                    <div class="id-opt"
+                        data-id="${i.id}"
+                        data-name="${i.name}"
+                        data-price="${i.selling_price ?? 0}"
+                        data-tax="${i.tax_id ?? ''}"
+                        data-hsn="${i.hsn_sac ?? ''}"
+                        onclick="selectItem(${ri}, this)">
+                        ${i.name}
+                        <div class="id-opt-sub">
+                            ${i.hsn_sac ? 'HSN/SAC: ' + i.hsn_sac : ''}
+                            ${i.selling_price ? ' ₹' + parseFloat(i.selling_price).toFixed(2) : ''}
+                        </div>
+                    </div>
+                `).join('')}
+
+                <div class="id-opt" onclick="openNewItemModal(${ri})" style="color:#2563eb;font-weight:700;">
+                    + Add New Item
+                </div>
             </div>
         </div>
-        <input type="hidden" name="item_id[]"   class="iid"   value="${d.item_id ?? ''}">
+
+        <input type="hidden" name="item_id[]" class="iid" value="${d.item_id ?? ''}">
         <input type="hidden" name="item_name[]" class="iname" value="${d.item_name ?? ''}">
-        <input type="text"   name="item_desc[]" class="desc-input" placeholder="Item description" value="${d.description ?? ''}">
+        <input type="text" name="item_desc[]" class="desc-input" placeholder="Item description" value="${d.description ?? ''}">
     </td>
 
-    <!-- Fix 3: HSN/SAC column -->
     <td style="padding:10px 8px;">
         <input type="text" name="hsn_sac[]" class="hsn-input"
             value="${d.hsn_sac ?? ''}"
             placeholder="HSN/SAC"
             style="width:100%;border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:12px;background:#fff;outline:none;"
-            onfocus="this.style.borderColor='#5065e8'" onblur="this.style.borderColor='#e8eaed'">
+            onfocus="this.style.borderColor='#5065e8'"
+            onblur="this.style.borderColor='#e8eaed'">
     </td>
 
     <td style="padding:10px 8px; text-align:center;">
         <input type="number" name="qty[]" class="num calc qty" value="${d.qty ?? 1}" min="0.01" step="0.01"
             style="width:65px;border:1px solid #e8eaed;border-radius:6px;padding:6px 6px;font-size:13px;text-align:center;background:#fff;outline:none;"
-            onfocus="this.style.borderColor='#5065e8'" onblur="this.style.borderColor='#e8eaed'">
+            onfocus="this.style.borderColor='#5065e8'"
+            onblur="this.style.borderColor='#e8eaed'">
     </td>
 
     <td style="padding:10px 8px;">
@@ -418,22 +785,26 @@ function addRow(d = {}) {
     <td style="padding:10px 8px;">
         <input type="number" name="rate[]" class="num calc rate" value="${d.rate ?? 0}" min="0" step="0.01"
             style="width:100%;border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:13px;text-align:right;background:#fff;outline:none;"
-            onfocus="this.style.borderColor='#5065e8'" onblur="this.style.borderColor='#e8eaed'">
+            onfocus="this.style.borderColor='#5065e8'"
+            onblur="this.style.borderColor='#e8eaed'">
     </td>
 
     <td style="padding:10px 8px; text-align:center;">
         <div style="display:flex;align-items:center;justify-content:center;gap:3px;">
             <input type="number" name="item_discount[]" class="num calc disc" value="${d.discount ?? 0}" min="0" max="100"
                 style="width:55px;border:1px solid #e8eaed;border-radius:6px;padding:6px 5px;font-size:13px;text-align:center;background:#fff;outline:none;"
-                onfocus="this.style.borderColor='#5065e8'" onblur="this.style.borderColor='#e8eaed'">
+                onfocus="this.style.borderColor='#5065e8'"
+                onblur="this.style.borderColor='#e8eaed'">
             <span style="color:#6b7280;font-size:12px;">%</span>
         </div>
     </td>
 
     <td style="padding:10px 8px;">
         <select name="tax_id[]" class="tselect" style="width:100%;border:1px solid #e8eaed;border-radius:6px;padding:6px 8px;font-size:12px;background:#fff;outline:none;">
-            <option value="" data-rate="0">No Tax</option>${taxOpts}
+            <option value="" data-rate="0">No Tax</option>
+            ${taxOpts}
         </select>
+
         <input type="hidden" name="tax_rate[]" class="trate" value="${d.tax_rate ?? 0}">
     </td>
 
@@ -468,24 +839,30 @@ function filterItems(ri, q) {
     q = q.toLowerCase();
     const list = document.getElementById('ilist-' + ri);
     list.classList.add('open');
+
     list.querySelectorAll('.id-opt').forEach(opt => {
-        opt.style.display = opt.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+        const name = (opt.dataset.name || '').toLowerCase();
+
+        if (!opt.dataset.name) {
+            opt.style.display = '';
+        } else {
+            opt.style.display = name.includes(q) ? '' : 'none';
+        }
     });
 }
 
 function selectItem(ri, opt) {
     const tr = document.getElementById('row-' + ri);
-    tr.querySelector('.iid').value          = opt.dataset.id;
-    tr.querySelector('.iname').value        = opt.dataset.name;
-    tr.querySelector('.iname-display').value = opt.dataset.name;
-    tr.querySelector('.rate').value         = opt.dataset.price || 0;
 
-    if (opt.dataset.hsn) {
-        tr.querySelector('.hsn-input').value = opt.dataset.hsn;
-    }
+    tr.querySelector('.iid').value = opt.dataset.id;
+    tr.querySelector('.iname').value = opt.dataset.name;
+    tr.querySelector('.iname-display').value = opt.dataset.name;
+    tr.querySelector('.rate').value = opt.dataset.price || 0;
+    tr.querySelector('.hsn-input').value = opt.dataset.hsn || '';
 
     if (opt.dataset.tax) {
         const ts = tr.querySelector('.tselect');
+
         for (let o of ts.options) {
             if (o.value == opt.dataset.tax) {
                 o.selected = true;
@@ -505,19 +882,107 @@ document.addEventListener('click', function(e) {
     }
 });
 
+/* ── New Item Modal Functions ── */
+function openNewItemModalForTable() {
+    addRow();
+    currentNewItemRow = rowIdx;
+    openNewItemModal(currentNewItemRow);
+}
+
+function openNewItemModal(ri) {
+    currentNewItemRow = ri;
+
+    document.getElementById('new_item_name').value = '';
+    document.getElementById('new_item_hsn_sac').value = '';
+    document.getElementById('new_item_rate').value = '';
+    document.getElementById('new_item_unit').value = 'pcs';
+    document.getElementById('new_item_tax_id').value = '';
+    document.getElementById('new_item_desc').value = '';
+
+    document.getElementById('newItemModal').style.display = 'flex';
+}
+
+function closeNewItemModal() {
+    document.getElementById('newItemModal').style.display = 'none';
+}
+
+function saveNewItemFromInvoice() {
+    const name = document.getElementById('new_item_name').value.trim();
+
+    if (!name) {
+        alert('Item name is required.');
+        return;
+    }
+
+    const formData = new FormData();
+
+    formData.append('name', name);
+    formData.append('hsn_sac', document.getElementById('new_item_hsn_sac').value);
+    formData.append('selling_price', document.getElementById('new_item_rate').value || 0);
+    formData.append('unit', document.getElementById('new_item_unit').value || 'pcs');
+    formData.append('tax_id', document.getElementById('new_item_tax_id').value);
+    formData.append('description', document.getElementById('new_item_desc').value);
+    formData.append('item_type', 'service');
+    formData.append('status', '1');
+
+    fetch("<?= base_url('invoice/items/ajax-store') ?>", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (!res.success) {
+            alert(res.message || 'Item could not be saved.');
+            return;
+        }
+
+        const item = res.item;
+
+        _items.push(item);
+
+        const tr = document.getElementById('row-' + currentNewItemRow);
+
+        if (tr) {
+            tr.querySelector('.iid').value = item.id;
+            tr.querySelector('.iname').value = item.name;
+            tr.querySelector('.iname-display').value = item.name;
+            tr.querySelector('.hsn-input').value = item.hsn_sac || '';
+            tr.querySelector('.rate').value = item.selling_price || 0;
+
+            if (item.tax_id) {
+                const ts = tr.querySelector('.tselect');
+
+                for (let o of ts.options) {
+                    if (o.value == item.tax_id) {
+                        o.selected = true;
+                        tr.querySelector('.trate').value = o.dataset.rate || 0;
+                        break;
+                    }
+                }
+            }
+        }
+
+        closeNewItemModal();
+        calcAll();
+    })
+    .catch(() => {
+        alert('Item save failed. Check route: invoice/items/ajax-store');
+    });
+}
+
 /* ── Totals calculation ── */
 function calcAll() {
     let sub = 0, tax = 0;
 
     document.querySelectorAll('#liTbody tr').forEach(tr => {
-        const qty  = parseFloat(tr.querySelector('.qty')?.value)   || 0;
-        const rate = parseFloat(tr.querySelector('.rate')?.value)  || 0;
-        const disc = parseFloat(tr.querySelector('.disc')?.value)  || 0;
-        const tr_  = parseFloat(tr.querySelector('.trate')?.value) || 0;
+        const qty = parseFloat(tr.querySelector('.qty')?.value) || 0;
+        const rate = parseFloat(tr.querySelector('.rate')?.value) || 0;
+        const disc = parseFloat(tr.querySelector('.disc')?.value) || 0;
+        const tr_ = parseFloat(tr.querySelector('.trate')?.value) || 0;
 
         const base = qty * rate * (1 - disc / 100);
-        const ta   = base * tr_ / 100;
-        const amt  = base + ta;
+        const ta = base * tr_ / 100;
+        const amt = base + ta;
 
         const el = tr.querySelector('.ramt');
         if (el) el.textContent = '₹' + amt.toFixed(2);
@@ -526,40 +991,42 @@ function calcAll() {
         tax += ta;
     });
 
-    const dt  = document.getElementById('discType')?.value;
-    const dv  = parseFloat(document.getElementById('discVal')?.value) || 0;
-    const da  = dt === 'percent' ? sub * dv / 100 : dv;
+    const dt = document.getElementById('discType')?.value;
+    const dv = parseFloat(document.getElementById('discVal')?.value) || 0;
+    const da = dt === 'percent' ? sub * dv / 100 : dv;
     const tot = sub - da + tax;
 
-    document.getElementById('sub_total').value    = sub.toFixed(2);
-    document.getElementById('tax_total').value    = tax.toFixed(2);
-    document.getElementById('disc_amount').value  = da.toFixed(2);
+    document.getElementById('sub_total').value = sub.toFixed(2);
+    document.getElementById('tax_total').value = tax.toFixed(2);
+    document.getElementById('disc_amount').value = da.toFixed(2);
     document.getElementById('total_hidden').value = tot.toFixed(2);
 
-    document.getElementById('dSub').textContent   = '₹' + sub.toFixed(2);
-    document.getElementById('dTax').textContent   = '₹' + tax.toFixed(2);
-    document.getElementById('dDisc').textContent  = '-₹' + da.toFixed(2);
+    document.getElementById('dSub').textContent = '₹' + sub.toFixed(2);
+    document.getElementById('dTax').textContent = '₹' + tax.toFixed(2);
+    document.getElementById('dDisc').textContent = '-₹' + da.toFixed(2);
     document.getElementById('dTotal').textContent = '₹' + tot.toFixed(2);
 }
 
 document.getElementById('discType')?.addEventListener('change', calcAll);
-document.getElementById('discVal')?.addEventListener('input',  calcAll);
+document.getElementById('discVal')?.addEventListener('input', calcAll);
 
-/* ── Load existing items (edit mode) ── */
+/* ── Load existing items edit mode ── */
 const existingItems = <?= json_encode($invoice_items ?? []) ?>;
-if (existingItems.length) { existingItems.forEach(i => addRow(i)); }
-else { addRow(); }
 
-/* ── Pre-select customer (edit mode) ── */
+if (existingItems.length) {
+    existingItems.forEach(i => addRow(i));
+} else {
+    addRow();
+}
+
+/* ── Pre-select customer edit mode ── */
 <?php if ($invoice && $invoice['customer_id']): ?>
 const preEl = document.querySelector('#custOptions .cd-item[data-id="<?= $invoice['customer_id'] ?>"]');
-if (preEl) selectCustomer(preEl);
+
+if (preEl) {
+    selectCustomer(preEl);
+}
 <?php endif; ?>
 </script>
 
 <?= $this->endSection() ?>
-PHPEOF
-echo "Done"
-Output
-
-Done
