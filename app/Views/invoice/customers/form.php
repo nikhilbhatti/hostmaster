@@ -640,6 +640,8 @@
                                 type="text"
                                 name="<?= $name ?>"
                                 class="input"
+                                data-billing-input="<?= esc($name) ?>"
+                                <?= ($name==='b_country' ? 'list="countryOptions" placeholder="Select or type country"' : ($name==='b_state' ? 'list="stateOptions" placeholder="Select or type state"' : '')) ?>
                                 value="<?= esc($c[$name] ?? '') ?>"
                             >
 
@@ -670,6 +672,13 @@
                     ];
                     ?>
 
+                    <div style="margin-bottom:18px;">
+                        <label style="display:flex;align-items:center;gap:10px;font-weight:600;">
+                            <input type="checkbox" id="sameAsBilling" onchange="toggleSameAddress(this)">
+                            Shipping address same as Billing address
+                        </label>
+                    </div>
+
                     <?php foreach($shipping as $label => $name): ?>
 
                     <div class="address-form">
@@ -682,6 +691,8 @@
                                 type="text"
                                 name="<?= $name ?>"
                                 class="input"
+                                data-shipping-input="<?= esc($name) ?>"
+                                <?= ($name==='s_country' ? 'list="countryOptions" placeholder="Select or type country"' : ($name==='s_state' ? 'list="stateOptions" placeholder="Select or type state"' : '')) ?>
                                 value="<?= esc($c[$name] ?? '') ?>"
                             >
 
@@ -694,6 +705,61 @@
                 </div>
 
             </div>
+
+            <datalist id="stateOptions">
+                <option value="Andhra Pradesh">
+                <option value="Arunachal Pradesh">
+                <option value="Assam">
+                <option value="Bihar">
+                <option value="Chhattisgarh">
+                <option value="Goa">
+                <option value="Gujarat">
+                <option value="Haryana">
+                <option value="Himachal Pradesh">
+                <option value="Jharkhand">
+                <option value="Karnataka">
+                <option value="Kerala">
+                <option value="Madhya Pradesh">
+                <option value="Maharashtra">
+                <option value="Manipur">
+                <option value="Meghalaya">
+                <option value="Mizoram">
+                <option value="Nagaland">
+                <option value="Odisha">
+                <option value="Punjab">
+                <option value="Rajasthan">
+                <option value="Sikkim">
+                <option value="Tamil Nadu">
+                <option value="Telangana">
+                <option value="Tripura">
+                <option value="Uttar Pradesh">
+                <option value="Uttarakhand">
+                <option value="West Bengal">
+                <option value="Delhi">
+                <option value="Puducherry">
+            </datalist>
+
+            <datalist id="countryOptions">
+                <option value="India">
+                <option value="United States">
+                <option value="United Kingdom">
+                <option value="Canada">
+                <option value="Australia">
+                <option value="United Arab Emirates">
+                <option value="Saudi Arabia">
+                <option value="Singapore">
+                <option value="Germany">
+                <option value="France">
+                <option value="Netherlands">
+                <option value="Switzerland">
+                <option value="Malaysia">
+                <option value="South Africa">
+                <option value="Japan">
+                <option value="China">
+                <option value="Brazil">
+                <option value="Mexico">
+                <option value="Italy">
+            </datalist>
 
         </div>
 
@@ -818,6 +884,48 @@
 </div>
 
 <script>
+
+function toggleSameAddress(checkbox){
+    const enabled = checkbox.checked;
+
+    document.querySelectorAll('[data-shipping-input]').forEach(shippingInput=>{
+        const shippingName = shippingInput.getAttribute('name');
+        const billingName = shippingName.replace(/^s_/, 'b_');
+        const billingInput = document.querySelector('[name="' + billingName + '"]');
+
+        if(billingInput){
+            if(enabled){
+                shippingInput.value = billingInput.value;
+                shippingInput.disabled = true;
+            } else {
+                shippingInput.disabled = false;
+            }
+        }
+    });
+}
+
+function syncBillingToShipping(){
+    const copyEnabled = document.getElementById('sameAsBilling')?.checked;
+    if(!copyEnabled) return;
+
+    document.querySelectorAll('[data-billing-input]').forEach(billingInput=>{
+        const billingName = billingInput.getAttribute('name');
+        const shippingName = billingName.replace(/^b_/, 's_');
+        const shippingInput = document.querySelector('[name="' + shippingName + '"]');
+
+        if(shippingInput){
+            shippingInput.value = billingInput.value;
+        }
+    });
+}
+
+function bindBillingSync(){
+    document.querySelectorAll('[data-billing-input]').forEach(input=>{
+        input.addEventListener('input', syncBillingToShipping);
+    });
+}
+
+bindBillingSync();
 
 function openTab(evt,id){
 
