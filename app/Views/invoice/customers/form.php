@@ -290,8 +290,21 @@
     </div>
 
     <div class="prefill-bar">
-        Prefill Customer details from the GST portal using the Customer's GSTIN.
-        <a href="#">Prefill ›</a>
+        Enter the customer's GSTIN below and click Prefill. If you configure a GST API key and host, details can be loaded from that service.
+        <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+            <input
+                type="text"
+                id="prefillGstin"
+                class="input"
+                placeholder="GSTIN"
+                value="<?= esc($c['gstin'] ?? '') ?>"
+                style="width:280px;"
+            >
+            <button type="button" class="btn btn-light" onclick="prefillFromGstin()">
+                Prefill
+            </button>
+            <span id="prefillMessage" style="color:#2563eb; font-weight:600;"></span>
+        </div>
     </div>
 
     <div class="customer-body">
@@ -392,6 +405,27 @@
                     class="input"
                     value="<?= esc($c['company_name'] ?? '') ?>"
                 >
+            </div>
+
+        </div>
+
+        <div class="form-row">
+
+            <div class="form-label">
+                GSTIN
+            </div>
+
+            <div>
+                <input
+                    type="text"
+                    name="gstin"
+                    class="input"
+                    placeholder="Enter GSTIN"
+                    value="<?= esc($c['gstin'] ?? '') ?>"
+                >
+                <div class="error-text">
+                    Enter GSTIN manually or use the top prefilling input.
+                </div>
             </div>
 
         </div>
@@ -926,6 +960,174 @@ function bindBillingSync(){
 }
 
 bindBillingSync();
+
+function prefillFromGstin(){
+    const gstin = document.getElementById('prefillGstin')?.value.trim();
+    const msg = document.getElementById('prefillMessage');
+    msg.style.color = '#2563eb';
+    msg.textContent = '';
+
+    if(!gstin){
+        msg.textContent = 'Please enter a GSTIN first.';
+        return;
+    }
+
+    fetch('<?= base_url('invoice/customers/prefill') ?>?gstin=' + encodeURIComponent(gstin))
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('No customer found with this GSTIN.');
+                }
+                throw new Error('Unable to fetch customer details.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            fillCustomerDetails(data);
+            const firstField = document.querySelector('[name="company_name"]');
+            if (firstField) {
+                firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstField.focus();
+            }
+            msg.textContent = 'Customer details loaded. Review and save.';
+        })
+        .catch(error => {
+            msg.style.color = '#dc2626';
+            msg.textContent = error.message;
+        });
+}
+
+function normalizePrefillPayload(data) {
+    if (!data || typeof data !== 'object') {
+        return data;
+    }
+
+    if (data.__raw_api_response && data.__raw_api_response.data && Array.isArray(data.__raw_api_response.data) && data.__raw_api_response.data.length) {
+        const rawItem = data.__raw_api_response.data[0];
+        if (rawItem && typeof rawItem === 'object') {
+            return Object.assign({}, rawItem, data);
+        }
+    }
+
+    if (data.data && Array.isArray(data.data) && data.data.length) {
+        const nested = data.data[0];
+        if (nested && typeof nested === 'object') {
+            return Object.assign({}, nested, data);
+        }
+    }
+
+    return Object.assign({}, data);
+}
+
+function extractAddress(data) {
+    if (!data || typeof data !== 'object') {
+        return {};
+    }
+
+    if (data.principalAddress && data.principalAddress.address) {
+        return data.principalAddress.address;
+    }
+
+    if (data.address && typeof data.address === 'object') {
+        return data.address;
+    }
+
+    if (Array.isArray(data.additionalAddress) && data.additionalAddress.length) {
+        const first = data.additionalAddress[0];
+        if (first && first.address && typeof first.address === 'object') {
+            return first.address;
+        }
+    }
+
+    if (Array.isArray(data.data) && data.data.length) {
+        return extractAddress(data.data[0]);
+    }
+
+    if (data.__raw_api_response && Array.isArray(data.__raw_api_response.data) && data.__raw_api_response.data.length) {
+        return extractAddress(data.__raw_api_response.data[0]);
+    }
+
+    return {};
+}
+
+function fillCustomerDetails(data){
+    data = normalizePrefillPayload(data);
+    const rawData = (data.__raw_api_response && Array.isArray(data.__raw_api_response.data) && data.__raw_api_response.data.length)
+        ? data.__raw_api_response.data[0]
+        : (Array.isArray(data.data) && data.data.length ? data.data[0] : data);
+
+    const addressData = extractAddress(data) || extractAddress(rawData) || {};
+
+    const setValue = (selector, value) => {
+        const el = document.querySelector(selector);
+        if (el && value !== undefined && value !== null) {
+            el.value = value;
+        }
+    };
+
+    if (!data.gstin) {
+        const prefillGstin = document.getElementById('prefillGstin')?.value.trim();
+        if (prefillGstin) {
+            data.gstin = prefillGstin;
+        }
+    }
+
+    data.company_name = data.company_name || data.legalName || data.tradeName || data.businessName || data.name || data.entityName || data.organisationName || '';
+    data.display_name = data.display_name || data.tradeName || data.company_name || data.legalName || '';
+    data.pan = data.pan || data.PAN || data.panNumber || '';
+    data.email = data.email || data.emailId || data.emailID || data.contactEmail || '';
+    data.work_phone = data.work_phone || data.phone || data.contactNumber || data.phoneNumber || data.mobileNumber || '';
+    data.mobile = data.mobile || data.mobileNumber || data.phone || data.contactNumber || '';
+
+    if (data.customer_type) {
+        const typeInput = document.querySelector('[name="customer_type"][value="' + data.customer_type + '"]');
+        if (typeInput) {
+            typeInput.checked = true;
+        }
+    }
+
+    setValue('[name="salutation"]', data.salutation || '');
+    setValue('[name="first_name"]', data.first_name || '');
+    setValue('[name="last_name"]', data.last_name || '');
+    setValue('[name="company_name"]', data.company_name || '');
+    setValue('[name="display_name"]', data.display_name || '');
+    setValue('[name="currency"]', data.currency || 'INR');
+    setValue('[name="email"]', data.email || '');
+    setValue('[name="work_phone"]', data.work_phone || '');
+    setValue('[name="mobile"]', data.mobile || '');
+    setValue('[name="gstin"]', data.gstin || data.gstNumber || '');
+    setValue('[name="pan"]', data.pan || '');
+    setValue('[name="payment_terms"]', data.payment_terms || 'due_on_receipt');
+    setValue('[name="b_attention"]', data.b_attention || addressData.attention || addressData.buildingName || addressData.buildingNumber || data.company_name || '');
+    setValue('[name="b_country"]', data.b_country || addressData.country || addressData.countryCode || 'India');
+    setValue('[name="b_address1"]', data.b_address1 || addressData.buildingName || addressData.buildingNumber || addressData.street || addressData.address || '');
+    setValue('[name="b_address2"]', data.b_address2 || addressData.location || addressData.locality || addressData.landMark || addressData.landmark || '');
+    setValue('[name="b_city"]', data.b_city || addressData.district || addressData.city || addressData.town || '');
+    setValue('[name="b_state"]', data.b_state || addressData.stateCode || addressData.state || addressData.region || '');
+    setValue('[name="b_zip"]', data.b_zip || addressData.pincode || addressData.postal_code || addressData.zip || '');
+    setValue('[name="b_phone"]', data.b_phone || '');
+    setValue('[name="s_attention"]', data.s_attention || '');
+    setValue('[name="s_country"]', data.s_country || '');
+    setValue('[name="s_address1"]', data.s_address1 || '');
+    setValue('[name="s_address2"]', data.s_address2 || '');
+    setValue('[name="s_city"]', data.s_city || '');
+    setValue('[name="s_state"]', data.s_state || '');
+    setValue('[name="s_zip"]', data.s_zip || '');
+    setValue('[name="s_phone"]', data.s_phone || '');
+
+    if (document.getElementById('sameAsBilling')?.checked) {
+        syncBillingToShipping();
+    }
+}
+
+function copyGstinToField(){
+    const gstin = document.getElementById('prefillGstin')?.value.trim();
+    const gstinField = document.querySelector('[name="gstin"]');
+    if(gstin && gstinField){
+        gstinField.value = gstin;
+        gstinField.focus();
+    }
+}
 
 function openTab(evt,id){
 

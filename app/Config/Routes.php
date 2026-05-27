@@ -289,6 +289,7 @@ $routes->group('invoice', ['namespace' => 'App\Controllers\Invoice'], function($
 
     $routes->get('customers/create', 'Customers::create');
     $routes->post('customers/store', 'Customers::store');
+    $routes->get('customers/prefill', 'Customers::prefill');
 
     $routes->get('customers/show/(:num)', 'Customers::show/$1');
 
