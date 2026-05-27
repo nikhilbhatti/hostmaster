@@ -290,21 +290,8 @@
     </div>
 
     <div class="prefill-bar">
-        Enter the customer's GSTIN below and click Prefill. If you configure a GST API key and host, details can be loaded from that service.
-        <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
-            <input
-                type="text"
-                id="prefillGstin"
-                class="input"
-                placeholder="GSTIN"
-                value="<?= esc($c['gstin'] ?? '') ?>"
-                style="width:280px;"
-            >
-            <button type="button" class="btn btn-light" onclick="prefillFromGstin()">
-                Prefill
-            </button>
-            <span id="prefillMessage" style="color:#2563eb; font-weight:600;"></span>
-        </div>
+        Prefill Customer details from the GST portal using the Customer's GSTIN.
+        <a href="#">Prefill ›</a>
     </div>
 
     <div class="customer-body">
