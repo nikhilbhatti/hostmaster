@@ -161,7 +161,7 @@ $hasLms = function($mod, $act = 'view') use ($lms_permissions, $user_role) {
             <li class="nav-item">
                 <a class="nav-link d-flex align-items-center justify-content-between <?= (strpos(uri_string(), 'orders') !== false) ? 'active' : 'collapsed' ?>" 
                    data-bs-toggle="collapse" href="#orderCollapse" role="button">
-                    <span><i class="fas fa-shopping-cart"></i> Operations</span>
+                    <span><i class="fas fa-shopping-cart"></i> Orders</span>
                     <i class="fas fa-chevron-down"></i>
                 </a>
                 <div class="collapse <?= (strpos(uri_string(), 'orders') !== false) ? 'show' : '' ?>" id="orderCollapse" data-bs-parent="#sidebarMenu">

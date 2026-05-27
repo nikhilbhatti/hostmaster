@@ -35,6 +35,48 @@ $total_words = numToWordsINR($inv['total']);
 .inv-statusbar{background:#fff;border:1px solid #e8eaed;border-radius:8px;padding:12px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px}
 .s-amt{font-size:20px;font-weight:700}.s-lbl{font-size:11px;color:#6b7280;margin-bottom:1px}.s-div{width:1px;height:32px;background:#e5e7eb}
 
+/* PAYMENTS TABLE FIX */
+.ztable{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:auto;
+}
+
+.ztable thead tr{
+    background:#f8fafc;
+}
+
+.ztable th{
+    padding:14px 12px;
+    font-size:14px;
+    font-weight:700;
+    color:#111827;
+    border-bottom:1px solid #e5e7eb;
+    text-align:left;
+    white-space:nowrap;
+}
+
+.ztable td{
+    padding:14px 12px;
+    border-bottom:1px solid #eef2f7;
+    font-size:14px;
+    color:#374151;
+    white-space:nowrap;
+    vertical-align:middle;
+}
+
+.ztable tbody tr:hover{
+    background:#f9fafb;
+}
+
+.table-wrap{
+    overflow-x:auto;
+    width:100%;
+}
+
+.text-end{
+    text-align:right !important;
+}
 /* ════════════════════════════════════════════════
    DROPDOWN (shared)
 ════════════════════════════════════════════════ */
