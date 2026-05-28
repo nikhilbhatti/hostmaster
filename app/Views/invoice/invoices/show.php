@@ -25,6 +25,7 @@ function numToWordsINR($n) {
     return $out.' Only';
 }
 $total_words = numToWordsINR($inv['total']);
+$is_paid = strtolower($inv['status']) === 'paid';
 ?>
 
 <style>
@@ -35,48 +36,49 @@ $total_words = numToWordsINR($inv['total']);
 .inv-statusbar{background:#fff;border:1px solid #e8eaed;border-radius:8px;padding:12px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px}
 .s-amt{font-size:20px;font-weight:700}.s-lbl{font-size:11px;color:#6b7280;margin-bottom:1px}.s-div{width:1px;height:32px;background:#e5e7eb}
 
+/* PAID BADGE BANNER */
+.paid-banner{
+    background:linear-gradient(135deg,#dcfce7,#bbf7d0);
+    border:1.5px solid #86efac;
+    border-radius:8px;
+    padding:10px 18px;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#15803d;
+    font-weight:600;
+    font-size:14px;
+}
+.paid-banner i{font-size:20px;}
+
+/* DISABLED BUTTON */
+.btn-disabled{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:500;
+    background:#f3f4f6;
+    color:#9ca3af;
+    border:1px solid #e5e7eb;
+    cursor:not-allowed;
+    opacity:0.6;
+    pointer-events:none;
+    text-decoration:none;
+}
+
 /* PAYMENTS TABLE FIX */
-.ztable{
-    width:100%;
-    border-collapse:collapse;
-    table-layout:auto;
-}
+.ztable{width:100%;border-collapse:collapse;table-layout:auto;}
+.ztable thead tr{background:#f8fafc;}
+.ztable th{padding:14px 12px;font-size:14px;font-weight:700;color:#111827;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap;}
+.ztable td{padding:14px 12px;border-bottom:1px solid #eef2f7;font-size:14px;color:#374151;white-space:nowrap;vertical-align:middle;}
+.ztable tbody tr:hover{background:#f9fafb;}
+.text-end{text-align:right !important;}
+.table-wrap{overflow-x:auto;width:100%;}
 
-.ztable thead tr{
-    background:#f8fafc;
-}
-
-.ztable th{
-    padding:14px 12px;
-    font-size:14px;
-    font-weight:700;
-    color:#111827;
-    border-bottom:1px solid #e5e7eb;
-    text-align:left;
-    white-space:nowrap;
-}
-
-.ztable td{
-    padding:14px 12px;
-    border-bottom:1px solid #eef2f7;
-    font-size:14px;
-    color:#374151;
-    white-space:nowrap;
-    vertical-align:middle;
-}
-
-.ztable tbody tr:hover{
-    background:#f9fafb;
-}
-
-.table-wrap{
-    overflow-x:auto;
-    width:100%;
-}
-
-.text-end{
-    text-align:right !important;
-}
 /* ════════════════════════════════════════════════
    DROPDOWN (shared)
 ════════════════════════════════════════════════ */
@@ -98,11 +100,11 @@ $total_words = numToWordsINR($inv['total']);
     font-family:'Times New Roman',Georgia,serif;color:#111;
     box-shadow:0 2px 14px rgba(0,0,0,.12);box-sizing:border-box;
 }
-/* CSS-var driven header */
 .tax-invoice::before{content:'';position:absolute;top:0;left:0;right:0;height:68px;background:var(--hdr,radial-gradient(160px 36px at 22% 2px,transparent 55%,#fff 57% 62%,transparent 64%),radial-gradient(360px 70px at 80% 30px,transparent 57%,#0b7285 58% 60%,transparent 62%),linear-gradient(160deg,#0b8fa3 0 58%,transparent 58%),#08a6bf)}
 .tax-invoice::after{content:'';position:absolute;top:32px;left:0;right:0;height:2px;background:var(--hdr-line,#0b7285)}
 .inv-body{position:relative;z-index:2}
 .draft-stamp{position:absolute;top:28px;left:-6px;background:#8fa1a5;color:#fff;font:700 13px Arial;letter-spacing:1px;padding:9px 42px;transform:rotate(-45deg);transform-origin:left top;z-index:10}
+.paid-stamp{position:absolute;top:90px;right:60px;border:4px solid #16a34a;color:#16a34a;font:800 28px Arial;letter-spacing:3px;padding:6px 18px;transform:rotate(-15deg);opacity:.18;z-index:10;pointer-events:none;border-radius:4px}
 
 /* Gear button inside invoice */
 .inv-gear{position:absolute;top:74px;right:50px;z-index:30}
@@ -145,7 +147,7 @@ $total_words = numToWordsINR($inv['total']);
 .footer-right{display:flex;align-items:flex-end;justify-content:center;font-size:12px;padding-bottom:8px}
 
 /* ════════════════════════════════════════════════
-   SETTINGS MODAL — Zoho Edit Template
+   SETTINGS MODAL
 ════════════════════════════════════════════════ */
 .s-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;align-items:flex-start;justify-content:center;padding-top:28px}
 .s-overlay.open{display:flex}
@@ -154,15 +156,11 @@ $total_words = numToWordsINR($inv['total']);
 .s-head h3{font-size:17px;font-weight:700;margin:0}
 .s-close{background:none;border:none;font-size:24px;color:#dc2626;cursor:pointer;line-height:1}
 .s-wrap{display:flex;flex:1;overflow:hidden}
-
-/* Left sidebar */
 .s-sidebar{width:136px;background:#172033;flex-shrink:0;overflow-y:auto}
 .s-tab{padding:14px 8px;text-align:center;cursor:pointer;color:#8ea3c0;font-size:11px;font-weight:500;border-left:3px solid transparent;transition:.15s;line-height:1.4}
 .s-tab i{display:block;font-size:19px;margin-bottom:3px}
 .s-tab:hover{color:#c8d8ec;background:rgba(255,255,255,.06)}
 .s-tab.on{color:#fff;background:#2f65c8;border-left-color:#76a9ff}
-
-/* Content area */
 .s-content{flex:1;overflow-y:auto;padding:22px 26px}
 .s-panel{display:none}.s-panel.on{display:block}
 .s-ptitle{font-size:18px;font-weight:700;margin:0 0 16px;color:#1a1f36}
@@ -176,13 +174,9 @@ $total_words = numToWordsINR($inv['total']);
 .sc-row{display:flex;align-items:center;gap:9px;margin-bottom:9px;font-size:13px;color:#374151}
 .sc-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:#5065e8}
 .sdiv{height:1px;background:#e8eaed;margin:16px 0}
-
-/* Paper size selector */
 .paper-opts{display:flex;gap:12px;margin-bottom:14px}
 .paper-opt{padding:8px 18px;border:1.5px solid #d1d5db;border-radius:6px;cursor:pointer;font-size:13px;transition:.15s;display:flex;align-items:center;gap:6px}
 .paper-opt.on{border-color:#5065e8;background:#f0f4ff;color:#5065e8;font-weight:600}
-
-/* Header background tiles */
 .hdr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .hdr-tile{height:60px;border:2px solid #e5e7eb;border-radius:7px;cursor:pointer;overflow:hidden;transition:.15s;position:relative}
 .hdr-tile:hover,.hdr-tile.on{border-color:#5065e8;box-shadow:0 0 0 2px rgba(80,101,232,.2)}
@@ -199,35 +193,34 @@ $total_words = numToWordsINR($inv['total']);
 .h-dots{background:radial-gradient(circle,#0b8fa3 0 3px,transparent 4px) 0 0/18px 18px,#fff}
 .h-stripe{background:repeating-linear-gradient(160deg,#0ea5e9 0 18px,#0284c7 18px 36px)}
 .h-none{background:#f8fafc;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:11px}
-
-/* Template cards */
 .tpl-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
 .tpl-card{border:2px solid #e5e7eb;border-radius:8px;overflow:hidden;cursor:pointer;transition:.15s}
 .tpl-card:hover{border-color:#94a3b8}.tpl-card.on{border-color:#3483fa;box-shadow:0 0 0 3px rgba(52,131,250,.15)}
 .tpl-prev{height:88px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .tpl-sel{background:#eaf3ff;color:#2473e8;text-align:center;padding:6px;font-weight:700;font-size:11px;letter-spacing:1px}
 .tpl-name{padding:9px 12px;font-size:13px;font-weight:500}
-
-/* Logo upload */
 .logo-zone{border:2px dashed #d1d5db;border-radius:8px;padding:28px;text-align:center;cursor:pointer;background:#fafafa;transition:.15s}
 .logo-zone:hover{border-color:#5065e8;background:#f0f4ff}
-
-/* Modal footer */
 .s-foot{padding:12px 22px;border-top:1px solid #e5e7eb;display:flex;gap:10px;flex-shrink:0}
 .btn-sav{background:#3483fa;color:#fff;border:none;border-radius:6px;padding:9px 22px;font-size:13px;font-weight:600;cursor:pointer}.btn-sav:hover{background:#2463d4}
 .btn-can{background:#fff;border:1px solid #d1d5db;border-radius:6px;padding:9px 18px;font-size:13px;cursor:pointer}
-
-/* Margin sliders */
 .margin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .margin-item label{font-size:12px;color:#6b7280;display:block;margin-bottom:3px}
 .margin-item input[type=number]{width:100%;border:1px solid #d1d5db;border-radius:5px;padding:7px 10px;font-size:13px;outline:none}
 
-/* Print/PDF */
 @media print{body *{visibility:hidden!important}#printArea,#printArea *{visibility:visible!important}#printArea{position:fixed!important;top:0;left:0;width:100%;padding:0!important;background:#fff!important}.tax-invoice{width:100%!important;box-shadow:none!important;padding:58px 42px 40px!important}.no-print,.inv-gear,.inv-topbar,.inv-statusbar{display:none!important}}
 .pdf-go .no-print,.pdf-go .inv-gear{display:none!important}
 .pdf-go #printArea{padding:0!important;background:#fff!important}
 .pdf-go .tax-invoice{box-shadow:none!important;margin:0!important}
 </style>
+
+<!-- ── PAID BANNER ── -->
+<?php if($is_paid): ?>
+<div class="paid-banner no-print">
+    <i class="bi bi-patch-check-fill"></i>
+    This invoice is fully paid. Editing, deleting payments, and recording new payments are disabled.
+</div>
+<?php endif; ?>
 
 <!-- ── TOP BAR ── -->
 <div class="inv-topbar no-print">
@@ -238,86 +231,63 @@ $total_words = numToWordsINR($inv['total']);
 
     <div style="display:flex;gap:7px;align-items:center">
 
-        <?php if($inv['status'] !== 'paid'): ?>
-
+        <?php if($is_paid): ?>
+            <!-- PAID: Record Payment disabled -->
+            <span class="btn-disabled">
+                <i class="bi bi-credit-card"></i> Record Payment
+            </span>
+        <?php else: ?>
             <a href="<?= base_url('invoice/payments/create-for-invoice/'.$inv['id']) ?>"
                class="btn btn-success">
-
-                <i class="bi bi-credit-card"></i>
-                Record Payment
+                <i class="bi bi-credit-card"></i> Record Payment
             </a>
-
         <?php endif; ?>
 
         <a href="<?= base_url('invoice/payments/history/'.$inv['id']) ?>"
            class="btn btn-outline">
-
-            <i class="bi bi-clock-history"></i>
-            Payment History
+            <i class="bi bi-clock-history"></i> Payment History
         </a>
 
-        <a href="<?= base_url('invoice/invoices/edit/'.$inv['id']) ?>"
-           class="btn btn-outline">
-
-            <i class="bi bi-pencil"></i>
-            Edit
-        </a>
+        <?php if($is_paid): ?>
+            <!-- PAID: Edit disabled -->
+            <span class="btn-disabled">
+                <i class="bi bi-pencil"></i> Edit
+            </span>
+        <?php else: ?>
+            <a href="<?= base_url('invoice/invoices/edit/'.$inv['id']) ?>"
+               class="btn btn-outline">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+        <?php endif; ?>
 
         <div class="zdrop" id="pdfDrop">
-
             <button type="button"
                     class="btn btn-outline"
                     onclick="event.stopPropagation();this.closest('.zdrop').classList.toggle('show')">
-
-                <i class="bi bi-file-earmark-pdf"></i>
-                PDF/Print
-
-                <i class="bi bi-chevron-down"
-                   style="font-size:10px"></i>
+                <i class="bi bi-file-earmark-pdf"></i> PDF/Print
+                <i class="bi bi-chevron-down" style="font-size:10px"></i>
             </button>
-
             <div class="zdrop-menu">
-
-                <button type="button"
-                        onclick="event.stopPropagation();dlPDF()">
-
-                    <i class="bi bi-file-earmark-pdf"
-                       style="color:#dc2626"></i>
-
-                    Download PDF
+                <button type="button" onclick="event.stopPropagation();dlPDF()">
+                    <i class="bi bi-file-earmark-pdf" style="color:#dc2626"></i> Download PDF
                 </button>
-
-                <button type="button"
-                        onclick="event.stopPropagation();window.print()">
-
-                    <i class="bi bi-printer"></i>
-                    Print Invoice
+                <button type="button" onclick="event.stopPropagation();window.print()">
+                    <i class="bi bi-printer"></i> Print Invoice
                 </button>
-
                 <div class="zdrop-div"></div>
-
-                <button type="button"
-                        onclick="event.stopPropagation();dlExcel()">
-
-                    <i class="bi bi-file-earmark-excel"
-                       style="color:#16a34a"></i>
-
-                    Export to Excel
+                <button type="button" onclick="event.stopPropagation();dlExcel()">
+                    <i class="bi bi-file-earmark-excel" style="color:#16a34a"></i> Export to Excel
                 </button>
-
             </div>
         </div>
 
-        <a href="<?= base_url('invoice/invoices') ?>"
-           class="btn btn-outline">
-
-            <i class="bi bi-arrow-left"></i>
-            Back
+        <a href="<?= base_url('invoice/invoices') ?>" class="btn btn-outline">
+            <i class="bi bi-arrow-left"></i> Back
         </a>
 
     </div>
-
 </div>
+
 <!-- ── STATUS BAR ── -->
 <div class="inv-statusbar no-print">
     <div><div class="s-lbl">Invoice Amount</div><div class="s-amt">₹<?= number_format($inv['total'],2) ?></div></div>
@@ -325,7 +295,11 @@ $total_words = numToWordsINR($inv['total']);
     <div><div class="s-lbl">Amount Paid</div><div class="s-amt" style="color:#16a34a">₹<?= number_format($inv['paid_amount'],2) ?></div></div>
     <div class="s-div"></div>
     <div><div class="s-lbl">Balance Due</div><div class="s-amt" style="color:#dc2626">₹<?= number_format($inv['balance_due'],2) ?></div></div>
-    <div style="margin-left:auto"><span class="badge badge-<?= esc($inv['status']) ?>" style="font-size:12px;padding:5px 14px"><?= strtoupper(esc($inv['status'])) ?></span></div>
+    <div style="margin-left:auto">
+        <span class="badge badge-<?= esc($inv['status']) ?>" style="font-size:12px;padding:5px 14px">
+            <?= strtoupper(esc($inv['status'])) ?>
+        </span>
+    </div>
 </div>
 
 <!-- ══════════════════════════════════════
@@ -336,6 +310,10 @@ $total_words = numToWordsINR($inv['total']);
 
     <?php if(strtolower($inv['status'])==='draft'): ?>
     <div class="draft-stamp">Draft</div>
+    <?php endif; ?>
+
+    <?php if($is_paid): ?>
+    <div class="paid-stamp">PAID</div>
     <?php endif; ?>
 
     <!-- Customize button inside invoice -->
@@ -477,15 +455,23 @@ $total_words = numToWordsINR($inv['total']);
 </div><!-- .tax-invoice -->
 </div><!-- #printArea -->
 
-<!-- Payments -->
+<!-- ══════════════════════════════════════
+     PAYMENTS TABLE
+══════════════════════════════════════════ -->
 <div class="card no-print" style="margin-top:20px">
     <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
         <h5>Payments Received</h5>
-
         <a href="<?= base_url('invoice/payments/history/'.$inv['id']) ?>" class="btn btn-outline">
             View Full History
         </a>
     </div>
+
+    <?php if($is_paid): ?>
+    <div style="background:#fefce8;border:1px solid #fde68a;border-radius:6px;margin:12px 16px;padding:10px 14px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:8px;">
+        <i class="bi bi-lock-fill"></i>
+        <span>Invoice is fully paid. Edit and Delete actions are locked.</span>
+    </div>
+    <?php endif; ?>
 
     <div class="table-wrap">
         <table class="ztable">
@@ -499,59 +485,58 @@ $total_words = numToWordsINR($inv['total']);
                     <th>Action</th>
                 </tr>
             </thead>
-
             <tbody>
             <?php if(!empty($payments)): ?>
-
                 <?php foreach($payments as $p): ?>
                     <tr>
                         <td style="font-weight:600;color:#5065e8">
                             <?= esc($p['payment_number'] ?? '-') ?>
                         </td>
-
                         <td>
                             <?= !empty($p['payment_date']) ? date('d/m/Y', strtotime($p['payment_date'])) : '-' ?>
                         </td>
-
                         <td>
                             <?= esc(ucwords(str_replace('_', ' ', $p['payment_mode'] ?? '-'))) ?>
                         </td>
-
                         <td>
                             <?= !empty($p['reference']) ? esc($p['reference']) : '-' ?>
                         </td>
-
                         <td style="color:#16a34a;font-weight:600;text-align:right;">
                             ₹<?= number_format((float)($p['amount'] ?? 0), 2) ?>
                         </td>
-
                         <td>
-                            <a href="<?= base_url('invoice/payments/edit/'.$p['id']) ?>" style="color:#2563eb;font-weight:600;text-decoration:none;">
-                                Edit
-                            </a>
-                            |
-                            <a href="<?= base_url('invoice/payments/delete/'.$p['id']) ?>"
-                               onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')"
-                               style="color:#dc2626;font-weight:600;text-decoration:none;">
-                                Delete
-                            </a>
+                            <?php if($is_paid): ?>
+                                <!-- PAID: Edit & Delete locked -->
+                                <span style="color:#9ca3af;font-size:13px;display:flex;align-items:center;gap:5px;">
+                                    <i class="bi bi-lock-fill" style="font-size:12px;"></i> Locked
+                                </span>
+                            <?php else: ?>
+                                <a href="<?= base_url('invoice/payments/edit/'.$p['id']) ?>"
+                                   style="color:#2563eb;font-weight:600;text-decoration:none;">
+                                    Edit
+                                </a>
+                                &nbsp;|&nbsp;
+                                <a href="<?= base_url('invoice/payments/delete/'.$p['id']) ?>"
+                                   onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')"
+                                   style="color:#dc2626;font-weight:600;text-decoration:none;">
+                                    Delete
+                                </a>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
-
             <?php else: ?>
-
                 <tr>
                     <td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">
                         No payments received for this invoice yet.
                     </td>
                 </tr>
-
             <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
+
 <!-- ══════════════════════════════════════
      SETTINGS MODAL
 ══════════════════════════════════════════ -->
@@ -562,8 +547,6 @@ $total_words = numToWordsINR($inv['total']);
         <button type="button" class="s-close" onclick="closeS()">&times;</button>
     </div>
     <div class="s-wrap">
-
-        <!-- Left Tabs -->
         <div class="s-sidebar">
             <div class="s-tab on" data-tab="tpl" onclick="switchTab('tpl')"><i class="bi bi-grid-1x2"></i>Templates</div>
             <div class="s-tab" data-tab="header" onclick="switchTab('header')"><i class="bi bi-layout-text-window-reverse"></i>Header &amp; Footer</div>
@@ -573,8 +556,6 @@ $total_words = numToWordsINR($inv['total']);
             <div class="s-tab" data-tab="total" onclick="switchTab('total')"><i class="bi bi-calculator"></i>Total</div>
             <div class="s-tab" data-tab="other" onclick="switchTab('other')"><i class="bi bi-three-dots"></i>Other Details</div>
         </div>
-
-        <!-- Panels -->
         <div class="s-content">
 
             <!-- ① Templates -->
@@ -613,7 +594,6 @@ $total_words = numToWordsINR($inv['total']);
             <!-- ② Header & Footer -->
             <div class="s-panel" id="p-header">
                 <div class="s-ptitle">Header &amp; Footer</div>
-
                 <div class="s-sub">Background Image / Style</div>
                 <div class="hdr-grid">
                     <div class="hdr-tile h-wave on" onclick="applyHdr('wave',this)" title="Wave"><div class="tile-lbl">Wave</div></div>
@@ -629,7 +609,6 @@ $total_words = numToWordsINR($inv['total']);
                     <div class="hdr-tile h-minimal" onclick="applyHdr('minimal',this)" title="Minimal"><div class="tile-lbl">Minimal</div></div>
                     <div class="hdr-tile h-none" onclick="applyHdr('none',this)">None<div class="tile-lbl">None</div></div>
                 </div>
-
                 <div class="sdiv"></div>
                 <div class="s-sub">Paper Size</div>
                 <div class="paper-opts">
@@ -637,7 +616,6 @@ $total_words = numToWordsINR($inv['total']);
                     <div class="paper-opt on" onclick="setPaper('letter',this)">Letter</div>
                     <div class="paper-opt" onclick="setPaper('a5',this)">A5</div>
                 </div>
-
                 <div class="s-sub">Margins (inches)</div>
                 <div class="margin-grid">
                     <div class="margin-item"><label>Top</label><input type="number" value="0.7" step="0.1" min="0" id="mg-top"></div>
@@ -645,7 +623,6 @@ $total_words = numToWordsINR($inv['total']);
                     <div class="margin-item"><label>Left</label><input type="number" value="0.55" step="0.1" min="0" id="mg-left"></div>
                     <div class="margin-item"><label>Right</label><input type="number" value="0.4" step="0.1" min="0" id="mg-right"></div>
                 </div>
-
                 <div class="sdiv"></div>
                 <div class="s-sub">Footer</div>
                 <div class="sc-row"><input type="checkbox" id="show-sig" checked onchange="document.getElementById('sig-block').style.display=this.checked?'flex':'none'"><label for="show-sig">Show Authorized Signature</label></div>
@@ -794,17 +771,16 @@ $total_words = numToWordsINR($inv['total']);
                 </table>
             </div>
 
-        </div><!-- .s-content -->
-    </div><!-- .s-wrap -->
+        </div>
+    </div>
     <div class="s-foot">
         <button type="button" class="btn-sav" onclick="saveSettings()"><i class="bi bi-check2"></i> Save</button>
         <button type="button" class="btn-can" onclick="closeS()">Cancel</button>
     </div>
-</div><!-- .s-box -->
-</div><!-- .s-overlay -->
+</div>
+</div>
 
 <script>
-// ── Modal ─────────────────────────────────────────────────
 function openS(tab) {
     document.getElementById('sModal').classList.add('open');
     switchTab(tab || 'tpl');
@@ -815,28 +791,25 @@ function switchTab(t) {
     document.querySelectorAll('.s-tab').forEach(el => el.classList.toggle('on', el.dataset.tab === t));
     document.querySelectorAll('.s-panel').forEach(el => el.classList.toggle('on', el.id === 'p-' + t));
 }
-
-// Close dropdowns on outside click
 document.addEventListener('click', e => {
     if (!e.target.closest('.zdrop')) document.querySelectorAll('.zdrop').forEach(d => d.classList.remove('show'));
 });
 
-// ── Header Backgrounds ────────────────────────────────────
 const HDR = {
-    wave: `radial-gradient(160px 36px at 22% 2px,transparent 55%,#fff 57% 62%,transparent 64%),radial-gradient(360px 70px at 80% 30px,transparent 57%,#0b7285 58% 60%,transparent 62%),linear-gradient(160deg,#0b8fa3 0 58%,transparent 58%),#08a6bf`,
-    teal: `linear-gradient(135deg,#0ea5e9,#0284c7)`,
-    green: `linear-gradient(135deg,#059669,#047857)`,
-    purple: `linear-gradient(135deg,#7c3aed,#4c1d95)`,
-    orange: `linear-gradient(135deg,#ea580c,#9a3412)`,
-    navy: `linear-gradient(160deg,#1e3a5f 0 60%,#0b1e36 60%)`,
-    rose: `linear-gradient(135deg,#e11d48,#9f1239)`,
-    bubble: `radial-gradient(circle at 12% 44%,#19b2c7 0 10px,transparent 11px),radial-gradient(circle at 24% 30%,#fff 0 9px,#19b2c7 10px,transparent 12px),radial-gradient(circle at 65% 25%,#19b2c7 0 7px,transparent 8px),#fff`,
-    dots: `radial-gradient(circle,#0b8fa3 0 3px,transparent 4px) 0 0/18px 18px,#fff`,
-    stripe: `repeating-linear-gradient(160deg,#0ea5e9 0 18px,#0284c7 18px 36px)`,
-    minimal: `repeating-linear-gradient(90deg,#f1f5f9 0 2px,transparent 2px 20px),#fff`,
-    none: `#f8fafc`
+    wave:`radial-gradient(160px 36px at 22% 2px,transparent 55%,#fff 57% 62%,transparent 64%),radial-gradient(360px 70px at 80% 30px,transparent 57%,#0b7285 58% 60%,transparent 62%),linear-gradient(160deg,#0b8fa3 0 58%,transparent 58%),#08a6bf`,
+    teal:`linear-gradient(135deg,#0ea5e9,#0284c7)`,
+    green:`linear-gradient(135deg,#059669,#047857)`,
+    purple:`linear-gradient(135deg,#7c3aed,#4c1d95)`,
+    orange:`linear-gradient(135deg,#ea580c,#9a3412)`,
+    navy:`linear-gradient(160deg,#1e3a5f 0 60%,#0b1e36 60%)`,
+    rose:`linear-gradient(135deg,#e11d48,#9f1239)`,
+    bubble:`radial-gradient(circle at 12% 44%,#19b2c7 0 10px,transparent 11px),radial-gradient(circle at 24% 30%,#fff 0 9px,#19b2c7 10px,transparent 12px),radial-gradient(circle at 65% 25%,#19b2c7 0 7px,transparent 8px),#fff`,
+    dots:`radial-gradient(circle,#0b8fa3 0 3px,transparent 4px) 0 0/18px 18px,#fff`,
+    stripe:`repeating-linear-gradient(160deg,#0ea5e9 0 18px,#0284c7 18px 36px)`,
+    minimal:`repeating-linear-gradient(90deg,#f1f5f9 0 2px,transparent 2px 20px),#fff`,
+    none:`#f8fafc`
 };
-const LINE_CLR = { wave:'#0b7285', teal:'#0284c7', green:'#047857', purple:'#4c1d95', orange:'#9a3412', navy:'#0b1e36', rose:'#9f1239', bubble:'#19b2c7', dots:'#0b8fa3', stripe:'#0284c7', minimal:'#e5e7eb', none:'#e5e7eb' };
+const LINE_CLR = {wave:'#0b7285',teal:'#0284c7',green:'#047857',purple:'#4c1d95',orange:'#9a3412',navy:'#0b1e36',rose:'#9f1239',bubble:'#19b2c7',dots:'#0b8fa3',stripe:'#0284c7',minimal:'#e5e7eb',none:'#e5e7eb'};
 
 function applyHdr(key, el) {
     const doc = document.getElementById('invDoc');
@@ -846,12 +819,11 @@ function applyHdr(key, el) {
     if (el) el.classList.add('on');
 }
 
-// ── Templates ─────────────────────────────────────────────
-const TPL_MAP = { spreadsheet:'wave', clean:'teal', classic:'navy', modern:'purple', minimal:'minimal', bold:'rose' };
+const TPL_MAP = {spreadsheet:'wave',clean:'teal',classic:'navy',modern:'purple',minimal:'minimal',bold:'rose'};
 function applyTpl(t, card) {
     document.querySelectorAll('.tpl-card').forEach(c => { c.classList.remove('on'); const s=c.querySelector('.tpl-sel'); if(s)s.remove(); });
     card.classList.add('on');
-    const strip = document.createElement('div'); strip.className = 'tpl-sel'; strip.textContent = '★ SELECTED';
+    const strip = document.createElement('div'); strip.className='tpl-sel'; strip.textContent='★ SELECTED';
     card.insertBefore(strip, card.querySelector('.tpl-name'));
     applyHdr(TPL_MAP[t] || 'wave');
     closeS();
@@ -861,14 +833,11 @@ function filterTpl(q) {
         c.style.display = c.querySelector('.tpl-name').textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
     });
 }
-
-// ── Paper ─────────────────────────────────────────────────
 function setPaper(p, el) {
     document.querySelectorAll('.paper-opt').forEach(o => o.classList.remove('on'));
     el.classList.add('on');
 }
 
-// ── Logo ──────────────────────────────────────────────────
 let logoSize = 100;
 function uploadLogo(e) {
     const f = e.target.files[0]; if(!f) return;
@@ -891,8 +860,6 @@ function resizeLogo(v) {
     const img = document.getElementById('logo-img');
     if (img) img.style.width = v + 'px';
 }
-
-// ── Company Address ───────────────────────────────────────
 function updateCoAddr() {
     const s = document.getElementById('org-street').value;
     const c = document.getElementById('org-city').value;
@@ -902,8 +869,6 @@ function updateCoAddr() {
     if (c || p) h += [c, p].filter(Boolean).join(', ') + '<br>';
     document.getElementById('co-addr').innerHTML = h;
 }
-
-// ── Table ─────────────────────────────────────────────────
 function toggleTableCol(thId, show) {
     const idx = document.getElementById(thId).cellIndex;
     document.querySelectorAll('#itmTbl tr').forEach(tr => { if(tr.cells[idx]) tr.cells[idx].style.display = show ? '' : 'none'; });
@@ -911,14 +876,10 @@ function toggleTableCol(thId, show) {
 function applyAltRow(on) {
     document.querySelectorAll('#itmTbl tbody tr').forEach((tr, i) => { tr.style.background = (on && i%2===0) ? '#f8f9fc' : ''; });
 }
-
-// ── Total rows ────────────────────────────────────────────
 function toggleTotRow(id, show) {
     const el = document.getElementById(id);
     if (el) el.style.display = show ? 'grid' : 'none';
 }
-
-// ── Signature image ───────────────────────────────────────
 function uploadSig(e) {
     const f = e.target.files[0]; if(!f) return;
     const r = new FileReader();
@@ -928,8 +889,6 @@ function uploadSig(e) {
     };
     r.readAsDataURL(f);
 }
-
-// ── Save Settings ─────────────────────────────────────────
 function saveSettings() {
     const notes = document.getElementById('notes-input').value;
     const terms = document.getElementById('terms-input').value;
@@ -939,8 +898,6 @@ function saveSettings() {
         : 'Thank you for your business.';
     closeS();
 }
-
-// ── PDF Download ──────────────────────────────────────────
 async function dlPDF() {
     const { jsPDF } = window.jspdf;
     const el = document.getElementById('invDoc');
@@ -955,20 +912,18 @@ async function dlPDF() {
     pdf.save('<?= esc($inv["invoice_number"]) ?>.pdf');
     document.body.classList.remove('pdf-go');
 }
-
-// ── Excel Export ──────────────────────────────────────────
 function dlExcel() {
     const wb = XLSX.utils.book_new();
     const rows = [
-        ['TAX INVOICE'], ['Invoice#', '<?= esc($inv["invoice_number"]) ?>'], ['Date', '<?= date("d/m/Y", strtotime($inv["invoice_date"])) ?>'],
-        ['Due Date', '<?= date("d/m/Y", strtotime($inv["due_date"])) ?>'], ['Customer', '<?= esc($inv["cname"]) ?>'], [],
-        ['#', 'Item', 'Qty', 'Rate', 'HSN/SAC', 'Amount']
+        ['TAX INVOICE'],['Invoice#','<?= esc($inv["invoice_number"]) ?>'],['Date','<?= date("d/m/Y", strtotime($inv["invoice_date"])) ?>'],
+        ['Due Date','<?= date("d/m/Y", strtotime($inv["due_date"])) ?>'],['Customer','<?= esc($inv["cname"]) ?>'],
+        [],['#','Item','Qty','Rate','HSN/SAC','Amount']
     ];
     document.querySelectorAll('#itmTbl tbody tr').forEach((tr, i) => {
         const td = tr.querySelectorAll('td');
         if (td.length >= 6) rows.push([i+1, td[1].innerText.trim(), td[2].innerText.trim(), td[3].innerText.trim(), td[4].innerText.trim(), td[5].innerText.trim()]);
     });
-    rows.push([], ['','','','Sub Total','₹<?= number_format($inv["sub_total"],2) ?>'], ['','','','Tax','₹<?= number_format($inv["tax_total"],2) ?>'], ['','','','Total','₹<?= number_format($inv["total"],2) ?>'], ['','','','Balance Due','₹<?= number_format($inv["balance_due"],2) ?>']);
+    rows.push([],['','','','Sub Total','₹<?= number_format($inv["sub_total"],2) ?>'],['','','','Tax','₹<?= number_format($inv["tax_total"],2) ?>'],['','','','Total','₹<?= number_format($inv["total"],2) ?>'],['','','','Balance Due','₹<?= number_format($inv["balance_due"],2) ?>']);
     const ws = XLSX.utils.aoa_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, 'Invoice');
     XLSX.writeFile(wb, '<?= esc($inv["invoice_number"]) ?>.xlsx');

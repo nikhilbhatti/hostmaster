@@ -9,14 +9,29 @@ class Backups extends BaseController {
     
     // 1. List All Backups
     public function index() {
-        $db = \Config\Database::connect();
-        $query = $db->query("SELECT b.*, c.client_name FROM backups b JOIN clients c ON b.client_id = c.id ORDER BY b.last_backup_date ASC");
-        
-        // BaseController ka data preserve karne ke liye $this->data use karein
-        $this->data['backups'] = $query->getResultArray();
-        
-        return view('backups/index', $this->data);
-    }
+
+    $db = \Config\Database::connect();
+
+    $query = $db->query("
+        SELECT 
+            b.*,
+            c.client_name,
+            o.domain_name,
+            ot.type_name AS order_type
+        FROM backups b
+        JOIN clients c 
+            ON b.client_id = c.id
+        LEFT JOIN orders o 
+            ON o.client_id = b.client_id
+        LEFT JOIN order_types ot 
+            ON ot.id = o.order_type_id
+        ORDER BY b.last_backup_date ASC
+    ");
+
+    $this->data['backups'] = $query->getResultArray();
+
+    return view('backups/index', $this->data);
+}
 
     // 2. Add Backup Form
     public function add() {

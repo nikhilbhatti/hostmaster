@@ -65,6 +65,7 @@ class Orders extends BaseController
 
     public function store()
     {
+        // --- [Aapka Purana Logic] Form Validation Rules ---
         $rules = [
             'client_id'     => 'required',
             'order_type_id' => 'required',
@@ -79,6 +80,7 @@ class Orders extends BaseController
 
         $domainName = $this->request->getPost('domain_name');
 
+        // --- [Aapka Purana Logic] Preparing data array ---
         $data = [
             'client_id'           => $this->request->getPost('client_id'),
             'order_type_id'       => $this->request->getPost('order_type_id'),
@@ -88,12 +90,14 @@ class Orders extends BaseController
             'hosting_plan'        => $this->request->getPost('hosting_plan'),
             'hosting_expiry_date' => $this->request->getPost('hosting_expiry_date'),
             'total_amount'        => $this->request->getPost('amount') ?: 0,
-            'status'              => 'active'
+            'status'              => 'active' // <--- Yeh hamesha naye order ko active hi rakhega
         ];
 
+        // --- [Aapka Purana Logic] Saving to Database ---
         if ($this->orderModel->save($data)) {
             $newOrderId = $this->orderModel->getInsertID(); 
             
+            // Safe Trigger: Ab BaseController naye record ki real date verify karke hi aage badhega
             $this->sendAutoExpiryEmails($newOrderId); 
 
             $this->log_activity("Created a new order for domain: " . $domainName);
@@ -105,7 +109,6 @@ class Orders extends BaseController
             return redirect()->back()->withInput()->with('error', 'Something went wrong while saving the order.');
         }
     }
-
     public function settings()
     {
         $settings = $this->smtpModel->find(1);
@@ -208,9 +211,11 @@ class Orders extends BaseController
         return view('client/orders/edit', $data);
     }
 
-    public function update($id)
+   public function update($id)
     {
         $domainName = $this->request->getPost('domain_name');
+        
+        // --- [Aapka Purana Logic] Preparing data from form ---
         $data = [
             'client_id'           => $this->request->getPost('client_id'),
             'order_type_id'       => $this->request->getPost('order_type_id'),
@@ -222,8 +227,15 @@ class Orders extends BaseController
             'total_amount'        => $this->request->getPost('amount'),
         ];
 
+        // Agar form se status badla gaya hai (like active/expired), toh use bhi array mein le lo
+        if ($this->request->getPost('status')) {
+            $data['status'] = $this->request->getPost('status');
+        }
+
+        // --- [Aapka Purana Logic] Updating database ---
         if ($this->orderModel->update($id, $data)) {
             
+            // Safe Trigger: Ab BaseController mein aapka status filter aur actual database date automatically sync ho kar hi mail bhejenge
             $this->sendAutoExpiryEmails($id); 
 
             $this->log_activity("Updated order details for: " . $domainName);
@@ -235,7 +247,6 @@ class Orders extends BaseController
             return redirect()->back()->with('error', 'Failed to update order.');
         }
     }
-
     public function delete($id)
     {
         $order = $this->orderModel->find($id);

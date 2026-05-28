@@ -133,6 +133,12 @@
     color: #ffffff;
 }
 
+.btn-disabled-custom {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
 /* STATUS BADGES */
 .status-badge {
     display: inline-flex;
@@ -276,6 +282,7 @@
 
                             <td>
                                 <div style="display:flex; gap:6px; justify-content:flex-end; padding-right:8px;">
+                                    <!-- View Button: Yeh hamesha dikhega -->
                                     <a href="<?= base_url('invoice/invoices/show/' . $inv['id']) ?>" class="action-badge-btn btn-view-custom" title="View">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -283,28 +290,41 @@
                                         </svg>
                                     </a>
 
-                                    <a href="<?= base_url('invoice/invoices/edit/' . $inv['id']) ?>" class="action-badge-btn btn-edit-custom" title="Edit">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M12 20h9"></path>
-                                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                        </svg>
-                                    </a>
+                                    <?php if ($statusKey !== 'paid'): ?>
+                                        <!-- Edit Button -->
+                                        <a href="<?= base_url('invoice/invoices/edit/' . $inv['id']) ?>" class="action-badge-btn btn-edit-custom" title="Edit">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 20h9"></path>
+                                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                            </svg>
+                                        </a>
 
-                                    <a href="<?= base_url('invoice/payments/create/' . $inv['id']) ?>" class="action-badge-btn btn-pay-custom" title="Record Payment">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                                            <line x1="1" y1="10" x2="23" y2="10"></line>
-                                        </svg>
-                                    </a>
+                                        <!-- Record Payment Button -->
+                                        <a href="<?= base_url('invoice/payments/create/' . $inv['id']) ?>" class="action-badge-btn btn-pay-custom" title="Record Payment">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                                <line x1="1" y1="10" x2="23" y2="10"></line>
+                                            </svg>
+                                        </a>
 
-                                    <a href="<?= base_url('invoice/invoices/delete/' . $inv['id']) ?>" class="action-badge-btn btn-delete-custom" onclick="return confirm('Delete?')" title="Delete">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                                        </svg>
-                                    </a>
+                                        <!-- Delete Button -->
+                                        <a href="<?= base_url('invoice/invoices/delete/' . $inv['id']) ?>" class="action-badge-btn btn-delete-custom" onclick="return confirm('Delete?')" title="Delete">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                                            </svg>
+                                        </a>
+                                    <?php else: ?>
+                                        <!-- Paid hone par Locked Disabled Icon dikhega -->
+                                        <span class="action-badge-btn btn-disabled-custom" title="Paid Invoices Cannot Be Modified">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                            </svg>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

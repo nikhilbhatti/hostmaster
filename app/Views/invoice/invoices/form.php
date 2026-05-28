@@ -907,6 +907,7 @@ function closeNewItemModal() {
 }
 
 function saveNewItemFromInvoice() {
+
     const name = document.getElementById('new_item_name').value.trim();
 
     if (!name) {
@@ -914,62 +915,51 @@ function saveNewItemFromInvoice() {
         return;
     }
 
-    const formData = new FormData();
+    const item = {
+        id: '',
+        name: name,
+        hsn_sac: document.getElementById('new_item_hsn_sac').value || '',
+        selling_price: document.getElementById('new_item_rate').value || 0,
+        unit: document.getElementById('new_item_unit').value || 'pcs',
+        tax_id: document.getElementById('new_item_tax_id').value || '',
+        description: document.getElementById('new_item_desc').value || ''
+    };
 
-    formData.append('name', name);
-    formData.append('hsn_sac', document.getElementById('new_item_hsn_sac').value);
-    formData.append('selling_price', document.getElementById('new_item_rate').value || 0);
-    formData.append('unit', document.getElementById('new_item_unit').value || 'pcs');
-    formData.append('tax_id', document.getElementById('new_item_tax_id').value);
-    formData.append('description', document.getElementById('new_item_desc').value);
-    formData.append('item_type', 'service');
-    formData.append('status', '1');
+    const tr = document.getElementById('row-' + currentNewItemRow);
 
-    fetch("<?= base_url('invoice/items/ajax-store') ?>", {
-        method: "POST",
-        body: formData
-    })
-    .then(res => res.json())
-    .then(res => {
-        if (!res.success) {
-            alert(res.message || 'Item could not be saved.');
-            return;
+    if (tr) {
+        tr.querySelector('.iid').value = '';
+        tr.querySelector('.iname').value = item.name;
+        tr.querySelector('.iname-display').value = item.name;
+        tr.querySelector('.hsn-input').value = item.hsn_sac;
+        tr.querySelector('.rate').value = item.selling_price;
+
+        const descInput = tr.querySelector('.desc-input');
+        if (descInput) {
+            descInput.value = item.description;
         }
 
-        const item = res.item;
-
-        _items.push(item);
-
-        const tr = document.getElementById('row-' + currentNewItemRow);
-
-        if (tr) {
-            tr.querySelector('.iid').value = item.id;
-            tr.querySelector('.iname').value = item.name;
-            tr.querySelector('.iname-display').value = item.name;
-            tr.querySelector('.hsn-input').value = item.hsn_sac || '';
-            tr.querySelector('.rate').value = item.selling_price || 0;
-
-            if (item.tax_id) {
-                const ts = tr.querySelector('.tselect');
-
-                for (let o of ts.options) {
-                    if (o.value == item.tax_id) {
-                        o.selected = true;
-                        tr.querySelector('.trate').value = o.dataset.rate || 0;
-                        break;
-                    }
-                }
-            }
+        const unitSelect = tr.querySelector('select[name="unit[]"]');
+        if (unitSelect) {
+            unitSelect.value = item.unit.toLowerCase();
         }
 
-        closeNewItemModal();
-        calcAll();
-    })
-    .catch(() => {
-        alert('Item save failed. Check route: invoice/items/ajax-store');
-    });
+        const ts = tr.querySelector('.tselect');
+
+        if (ts) {
+            ts.value = item.tax_id;
+
+            const selectedOption = ts.options[ts.selectedIndex];
+
+            tr.querySelector('.trate').value = selectedOption
+                ? (selectedOption.dataset.rate || 0)
+                : 0;
+        }
+    }
+
+    closeNewItemModal();
+    calcAll();
 }
-
 /* ── Totals calculation ── */
 function calcAll() {
     let sub = 0, tax = 0;

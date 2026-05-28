@@ -35,6 +35,8 @@
 .btn-add{background:#2563eb;color:#fff;padding:10px 15px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:700}
 .btn-add:hover{background:#1d4ed8;color:#fff}
 .btn-print{background:#111827;color:#fff;border:0;padding:10px 15px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer}
+.disabled-action{color:#9ca3af!important;cursor:not-allowed;text-decoration:none!important;font-weight:700}
+.btn-disabled{background:#9ca3af!important;color:#fff!important;cursor:not-allowed;pointer-events:none}
 @media(max-width:900px){.summary-wrap{grid-template-columns:1fr 1fr}.history-top{flex-direction:column;align-items:flex-start}}
 @media(max-width:600px){.summary-wrap{grid-template-columns:1fr}}
 @media print{.btn-back,.footer-actions{display:none!important}.history-page{background:#fff}.summary-wrap{background:#fff}}
@@ -46,6 +48,7 @@ $paid         = (float)($invoice['paid_amount'] ?? 0);
 $balance      = (float)($invoice['balance_due'] ?? max(0, $total - $paid));
 $status       = strtolower($invoice['status'] ?? 'unpaid');
 $statusClass  = 'status-' . $status;
+$isPaid       = ($status === 'paid');
 ?>
 
 <div class="history-page">
@@ -182,9 +185,15 @@ $statusClass  = 'status-' . $status;
                         </td>
 
                         <td>
-                            <a href="<?= base_url('invoice/payments/edit/' . $p['id']) ?>" style="color:#2563eb;font-weight:700;text-decoration:none;">Edit</a>
-                            |
-                            <a href="<?= base_url('invoice/payments/delete/' . $p['id']) ?>" onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')" style="color:#dc2626;font-weight:700;text-decoration:none;">Delete</a>
+                            <?php if($isPaid): ?>
+                                <span class="disabled-action">Edit</span>
+                                |
+                                <span class="disabled-action">Delete</span>
+                            <?php else: ?>
+                                <a href="<?= base_url('invoice/payments/edit/' . $p['id']) ?>" style="color:#2563eb;font-weight:700;text-decoration:none;">Edit</a>
+                                |
+                                <a href="<?= base_url('invoice/payments/delete/' . $p['id']) ?>" onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')" style="color:#dc2626;font-weight:700;text-decoration:none;">Delete</a>
+                            <?php endif; ?>
                         </td>
                     </tr>
 
@@ -209,9 +218,15 @@ $statusClass  = 'status-' . $status;
     </div>
 
     <div class="footer-actions">
-        <a href="<?= base_url('invoice/payments/create-for-invoice/' . ($invoice['id'] ?? 0)) ?>" class="btn-add">
-            + Receive More Payment
-        </a>
+        <?php if($isPaid): ?>
+            <a href="javascript:void(0)" class="btn-add btn-disabled">
+                + Receive More Payment
+            </a>
+        <?php else: ?>
+            <a href="<?= base_url('invoice/payments/create-for-invoice/' . ($invoice['id'] ?? 0)) ?>" class="btn-add">
+                + Receive More Payment
+            </a>
+        <?php endif; ?>
 
         <button type="button" class="btn-print" onclick="window.print()">
             Print History
