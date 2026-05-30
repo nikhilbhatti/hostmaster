@@ -309,9 +309,24 @@ body.customer-menu-open #globalItemMenu { display:none !important; }
                 <textarea name="customer_notes" class="form-control" rows="3"><?= esc($invoice['customer_notes'] ?? 'Thank you for your business.') ?></textarea>
             </div>
             <div class="form-group">
-                <label class="form-label">Terms & Conditions</label>
-                <textarea name="terms" class="form-control" rows="3"><?= esc($invoice['terms'] ?? '') ?></textarea>
-            </div>
+    <label class="form-label">Terms & Conditions</label>
+
+    <select class="form-select mb-2"
+        onchange="document.querySelector('[name=terms]').value=this.value">
+        <option value="">Select Previous Terms...</option>
+
+        <?php if(!empty($terms_suggestions)): ?>
+            <?php foreach($terms_suggestions as $t): ?>
+                <option value="<?= esc($t['terms']) ?>">
+                    <?= esc(substr($t['terms'],0,100)) ?>
+                </option>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+    </select>
+
+    <textarea name="terms" class="form-control" rows="3"><?= esc($invoice['terms'] ?? '') ?></textarea>
+</div>
         </div>
     </div>
 
@@ -348,6 +363,14 @@ body.customer-menu-open #globalItemMenu { display:none !important; }
     </button>
     <a href="<?= base_url('invoice/invoices') ?>" class="btn btn-outline">Cancel</a>
 </div>
+
+<datalist id="descriptionList">
+<?php if(!empty($descriptions)): ?>
+    <?php foreach($descriptions as $d): ?>
+        <option value="<?= esc($d['description']) ?>"></option>
+    <?php endforeach; ?>
+<?php endif; ?>
+</datalist>
 </form>
 
 <div id="globalItemMenu" class="item-dd-menu" style="display:none;left:-99999px;top:-99999px;">
@@ -628,7 +651,7 @@ function addRow(d = {}) {
         </div>
         <input type="hidden" name="item_id[]"   class="iid"   value="${escapeHtml(d.item_id ?? '')}">
         <input type="hidden" name="item_name[]" class="iname" value="${escapeHtml(d.item_name ?? '')}">
-        <input type="text"   name="item_desc[]" class="desc-input" placeholder="Description (optional)" value="${escapeHtml(d.description ?? '')}">
+        <input type="text" name="item_desc[]" class="desc-input" list="descriptionList" placeholder="Description (optional)" value="${escapeHtml(d.description ?? '')}">
     </td>
     <td style="padding:8px 6px; width:110px;">
         <input type="text" name="hsn_sac[]" class="hsn-input num-input" value="${escapeHtml(d.hsn_sac ?? '')}" placeholder="HSN/SAC" style="text-align:left;">

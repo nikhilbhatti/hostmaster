@@ -176,76 +176,74 @@ class Invoices extends BaseController
     }
 
     public function update($id)
-    {
-        $total = (float)$this->request->getPost('total');
+{
+    $total = (float)$this->request->getPost('total');
 
-        $oldInvoice = $this->m->find($id);
+    $oldInvoice = $this->m->find($id);
 
-        if (!$oldInvoice) {
-            return redirect()
-                ->to(base_url('invoice/invoices'))
-                ->with('error', 'Invoice not found.');
-        }
-
-        $invoiceNumber = trim((string)$this->request->getPost('invoice_number'));
-
-        if ($invoiceNumber === '') {
-            $invoiceNumber = $oldInvoice['invoice_number'] ?? $this->generateInvoiceNumber();
-        }
-
-        $action = $this->request->getPost('inv_action');
-        $status = ($action === 'sent') ? 'sent' : 'draft';
-
-        $db = \Config\Database::connect();
-
-        $paidRow = $db->table('payments')
-            ->selectSum('amount')
-            ->where('invoice_id', $id)
-            ->get()
-            ->getRowArray();
-
-        $paidAmount = (float)($paidRow['amount'] ?? 0);
-        $balanceDue = max(0, $total - $paidAmount);
-
-        if ($paidAmount > 0 && $balanceDue <= 0) {
-            $status = 'paid';
-        } elseif ($paidAmount > 0 && $balanceDue > 0) {
-            $status = 'partially_paid';
-        }
-
-        $this->m->update($id, [
-
-            'invoice_number'  => $invoiceNumber,
-            'customer_id'     => $this->request->getPost('customer_id'),
-            'reference'       => $this->request->getPost('reference'),
-            'invoice_date'    => $this->request->getPost('invoice_date'),
-            'due_date'        => $this->request->getPost('due_date'),
-            'payment_terms'   => $this->request->getPost('payment_terms'),
-            'subject'         => $this->request->getPost('subject'),
-            'status'          => $status,
-            'sub_total'       => $this->request->getPost('sub_total'),
-            'discount_type'   => $this->request->getPost('discount_type'),
-            'discount_value'  => $this->request->getPost('discount_value'),
-            'discount_amount' => $this->request->getPost('discount_amount'),
-            'tax_total'       => $this->request->getPost('tax_total'),
-            'total'           => $total,
-            'paid_amount'     => $paidAmount,
-            'balance_due'     => $balanceDue,
-            'customer_notes'  => $this->request->getPost('customer_notes'),
-            'terms'           => $this->request->getPost('terms')
-
-        ]);
-
-        $this->im
-            ->where('invoice_id', $id)
-            ->delete();
-
-        $this->saveLineItems($id);
-
+    if (!$oldInvoice) {
         return redirect()
-            ->to(base_url('invoice/invoices/show/' . $id))
-            ->with('success', 'Invoice updated successfully.');
+            ->to(base_url('invoice/invoices'))
+            ->with('error', 'Invoice not found.');
     }
+
+    $invoiceNumber = trim((string)$this->request->getPost('invoice_number'));
+
+    if ($invoiceNumber === '') {
+        $invoiceNumber = $oldInvoice['invoice_number'] ?? $this->generateInvoiceNumber();
+    }
+
+    $action = $this->request->getPost('inv_action');
+    $status = ($action === 'sent') ? 'sent' : 'draft';
+
+    $db = \Config\Database::connect();
+
+    $paidRow = $db->table('payments')
+        ->selectSum('amount')
+        ->where('invoice_id', $id)
+        ->get()
+        ->getRowArray();
+
+    $paidAmount = (float)($paidRow['amount'] ?? 0);
+    $balanceDue = max(0, $total - $paidAmount);
+
+    if ($paidAmount > 0 && $balanceDue <= 0) {
+        $status = 'paid';
+    } elseif ($paidAmount > 0 && $balanceDue > 0) {
+        $status = 'partially_paid';
+    }
+
+    $this->m->update($id, [
+        'invoice_number'  => $invoiceNumber,
+        'customer_id'     => $this->request->getPost('customer_id'),
+        'reference'       => $this->request->getPost('reference'),
+        'invoice_date'    => $this->request->getPost('invoice_date'),
+        'due_date'        => $this->request->getPost('due_date'),
+        'payment_terms'   => $this->request->getPost('payment_terms'),
+        'subject'         => $this->request->getPost('subject'),
+        'status'          => $status,
+        'sub_total'       => $this->request->getPost('sub_total'),
+        'discount_type'   => $this->request->getPost('discount_type'),
+        'discount_value'  => $this->request->getPost('discount_value'),
+        'discount_amount' => $this->request->getPost('discount_amount'),
+        'tax_total'       => $this->request->getPost('tax_total'),
+        'total'           => $total,
+        'paid_amount'     => $paidAmount,
+        'balance_due'     => $balanceDue,
+        'customer_notes'  => $this->request->getPost('customer_notes'),
+        'terms'           => $this->request->getPost('terms')
+    ]);
+
+    $this->im
+        ->where('invoice_id', $id)
+        ->delete();
+
+    $this->saveLineItems($id);
+
+    return redirect()
+        ->to(base_url('invoice/invoices/show/' . $id))
+        ->with('success', 'Invoice updated successfully.');
+}
 
    public function delete($id)
 {
@@ -268,34 +266,49 @@ class Invoices extends BaseController
         ->to(base_url('invoice/invoices'))
         ->with('success', 'Invoice moved to Trash successfully.');
 }
-    private function formData($inv)
-    {
-        return [
+  private function formData($inv)
+{
+    return [
 
-            'invoice' => $inv,
+        'invoice' => $inv,
 
-            'invoice_items' => $inv
-                ? $this->im
-                    ->where('invoice_id', $inv['id'])
-                    ->findAll()
-                : [],
-
-            'customers' => (new CustomerModel())
-                ->where('status', 1)
-                ->orderBy('display_name')
-                ->findAll(),
-
-            'items' => (new ItemModel())
-                ->where('status', 1)
-                ->orderBy('name')
-                ->findAll(),
-
-            'taxes' => (new TaxModel())
-                ->where('status', 1)
+        'invoice_items' => $inv
+            ? $this->im
+                ->where('invoice_id', $inv['id'])
                 ->findAll()
-        ];
-    }
+            : [],
 
+        'customers' => (new CustomerModel())
+            ->where('status', 1)
+            ->orderBy('display_name')
+            ->findAll(),
+
+        'items' => (new ItemModel())
+            ->where('status', 1)
+            ->orderBy('name')
+            ->findAll(),
+
+        'taxes' => (new TaxModel())
+            ->where('status', 1)
+            ->findAll(),
+
+        'descriptions' => $this->im
+            ->select('description')
+            ->where('description IS NOT NULL')
+            ->where('description !=', '')
+            ->groupBy('description')
+            ->orderBy('description', 'ASC')
+            ->findAll(),
+
+        'terms_suggestions' => $this->m
+            ->select('terms')
+            ->where('terms IS NOT NULL')
+            ->where('terms !=', '')
+            ->groupBy('terms')
+            ->orderBy('id', 'DESC')
+            ->findAll()
+    ];
+}
     private function saveLineItems($iid)
     {
         $names = $this->request->getPost('item_name');
