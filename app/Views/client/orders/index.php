@@ -103,9 +103,14 @@
             <h3 class="fw-bold text-dark mb-1">Orders Management</h3>
             <p class="text-muted small mb-0">Track domain and service subscriptions</p>
         </div>
-        <a href="<?= base_url('orders/add') ?>" class="btn btn-primary shadow-sm px-4 py-2" style="border-radius: 12px; background: #6366f1; border:none;">
-            <i class="fas fa-plus-circle me-2"></i> Create New Order
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="<?= base_url('orders/archive') ?>" class="btn btn-warning shadow-sm px-4 py-2" style="border-radius: 12px; border:none;">
+                <i class="fas fa-archive me-2"></i> View Archive
+            </a>
+            <a href="<?= base_url('orders/add') ?>" class="btn btn-primary shadow-sm px-4 py-2" style="border-radius: 12px; background: #6366f1; border:none;">
+                <i class="fas fa-plus-circle me-2"></i> Create New Order
+            </a>
+        </div>
     </div>
 
     <div class="row g-3 mb-4">
@@ -223,8 +228,8 @@
                         <i class="fas fa-eye me-2 text-info"></i> View Details
                     </a>
                     <hr class="my-1 opacity-25">
-                    <a id="deleteLink" href="#" class="btn btn-light text-start py-2 px-3 border-0 rounded-3 text-danger" onclick="return confirm('Delete order?')">
-                        <i class="fas fa-trash-alt me-2"></i> Delete Order
+                    <a id="archiveLink" href="#" class="btn btn-light text-start py-2 px-3 border-0 rounded-3 text-warning" onclick="return confirm('Move this order to archive? You can restore or replace it later from Archive Orders.')">
+                        <i class="fas fa-archive me-2"></i> Move to Archive
                     </a>
                 </div>
             </div>
@@ -269,7 +274,7 @@ function openActionPopup(id, domain) {
     document.getElementById('modalDomainName').innerText = domain;
     document.getElementById('editLink').href = "<?= base_url('orders/edit') ?>/" + id;
     document.getElementById('viewLink').href = "<?= base_url('orders/view') ?>/" + id;
-    document.getElementById('deleteLink').href = "<?= base_url('orders/delete') ?>/" + id;
+    document.getElementById('archiveLink').href = "<?= base_url('orders/delete') ?>/" + id;
     new bootstrap.Modal(document.getElementById('actionModal')).show();
 }
 </script>

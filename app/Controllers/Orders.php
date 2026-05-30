@@ -27,6 +27,7 @@ class Orders extends BaseController
                                     ->join('clients', 'clients.id = orders.client_id', 'left')
                                     ->join('order_types', 'order_types.id = orders.order_type_id', 'left')
                                     ->join('service_providers', 'service_providers.id = orders.provider_id', 'left')
+                                    ->where('orders.status !=', 'archived')
                                     ->orderBy('orders.id', 'DESC')
                                     ->findAll();
 
@@ -250,13 +251,101 @@ class Orders extends BaseController
     public function delete($id)
     {
         $order = $this->orderModel->find($id);
-        if ($this->orderModel->delete($id)) {
-            $domain = isset($order['domain_name']) ? $order['domain_name'] : $id;
-            log_activity("Deleted order record for: " . $domain);
-            // English Fix: Order deleted
-            return redirect()->to(base_url('orders'))->with('success', 'Order deleted successfully.');
+
+        if (!$order) {
+            return redirect()->to(base_url('orders'))->with('error', 'Order not found!');
         }
-        // English Fix: Delete failed
-        return redirect()->to(base_url('orders'))->with('error', 'Unable to delete order.');
+
+        $archiveData = [
+            'status'         => 'archived',
+            'archived_at'    => date('Y-m-d H:i:s'),
+            'archive_reason' => 'Manually archived / order cut'
+        ];
+
+        if ($this->orderModel->update($id, $archiveData)) {
+            $domain = isset($order['domain_name']) ? $order['domain_name'] : $id;
+            log_activity("Archived order record for: " . $domain);
+            return redirect()->to(base_url('orders'))->with('success', 'Order moved to archive successfully.');
+        }
+
+        return redirect()->to(base_url('orders'))->with('error', 'Unable to archive order.');
+    }
+
+    public function archive()
+    {
+        $data['orders'] = $this->orderModel->select('orders.*, clients.client_name, order_types.type_name, service_providers.provider_name')
+                                    ->join('clients', 'clients.id = orders.client_id', 'left')
+                                    ->join('order_types', 'order_types.id = orders.order_type_id', 'left')
+                                    ->join('service_providers', 'service_providers.id = orders.provider_id', 'left')
+                                    ->where('orders.status', 'archived')
+                                    ->orderBy('orders.archived_at', 'DESC')
+                                    ->findAll();
+
+        return view('client/orders/archive', $data);
+    }
+
+    public function restore($id)
+    {
+        $order = $this->orderModel->find($id);
+
+        if (!$order) {
+            return redirect()->to(base_url('orders/archive'))->with('error', 'Order not found!');
+        }
+
+        if ($this->orderModel->update($id, [
+            'status'         => 'active',
+            'archived_at'    => null,
+            'archive_reason' => null
+        ])) {
+            log_activity("Restored archived order: " . ($order['domain_name'] ?? $id));
+            return redirect()->to(base_url('orders/archive'))->with('success', 'Order restored successfully.');
+        }
+
+        return redirect()->to(base_url('orders/archive'))->with('error', 'Unable to restore order.');
+    }
+
+    public function replace($id)
+    {
+        $oldOrder = $this->orderModel->find($id);
+
+        if (!$oldOrder) {
+            return redirect()->to(base_url('orders/archive'))->with('error', 'Archived order not found!');
+        }
+
+        // Old archived record safe rahega. Iski copy new active order banegi.
+        unset($oldOrder['id']);
+
+        $oldOrder['status']         = 'active';
+        $oldOrder['archived_at']    = null;
+        $oldOrder['archive_reason'] = null;
+        $oldOrder['created_at']     = date('Y-m-d H:i:s');
+        $oldOrder['updated_at']     = date('Y-m-d H:i:s');
+
+        if ($this->orderModel->insert($oldOrder)) {
+            log_activity("Replaced archived order and created new active order for: " . ($oldOrder['domain_name'] ?? $id));
+            return redirect()->to(base_url('orders'))->with('success', 'Archived order replaced successfully. New active order created.');
+        }
+
+        return redirect()->to(base_url('orders/archive'))->with('error', 'Unable to replace archived order.');
+    }
+
+    public function permanentDelete($id)
+    {
+        $order = $this->orderModel->find($id);
+
+        if (!$order) {
+            return redirect()->to(base_url('orders/archive'))->with('error', 'Order not found!');
+        }
+
+        if (($order['status'] ?? '') !== 'archived') {
+            return redirect()->to(base_url('orders'))->with('error', 'Only archived orders can be permanently deleted.');
+        }
+
+        if ($this->orderModel->delete($id)) {
+            log_activity("Permanently deleted archived order: " . ($order['domain_name'] ?? $id));
+            return redirect()->to(base_url('orders/archive'))->with('success', 'Archived order permanently deleted.');
+        }
+
+        return redirect()->to(base_url('orders/archive'))->with('error', 'Unable to permanently delete order.');
     }
 }

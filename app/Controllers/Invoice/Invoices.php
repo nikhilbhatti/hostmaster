@@ -22,35 +22,36 @@ class Invoices extends BaseController
     }
 
     public function index()
-    {
-        $db = \Config\Database::connect();
+{
+    $db = \Config\Database::connect();
 
-        $status = $this->request->getGet('status');
+    $status = $this->request->getGet('status');
 
-        $sql = "
-            SELECT 
-                i.*, 
-                c.display_name AS cname 
-            FROM invoices i 
-            LEFT JOIN customers c ON i.customer_id = c.id
-        ";
+    $sql = "
+        SELECT 
+            i.*, 
+            c.display_name AS cname 
+        FROM invoices i 
+        LEFT JOIN customers c ON i.customer_id = c.id
+        WHERE i.status != 'trashed'
+    ";
 
-        $params = [];
+    $params = [];
 
-        if ($status) {
-            $sql .= " WHERE i.status = ?";
-            $params[] = $status;
-        }
-
-        $sql .= " ORDER BY i.id DESC";
-
-        $invoices = $db->query($sql, $params)->getResultArray();
-
-        return view('invoice/invoices/index', [
-            'invoices'      => $invoices,
-            'status_filter' => $status
-        ]);
+    if ($status) {
+        $sql .= " AND i.status = ?";
+        $params[] = $status;
     }
+
+    $sql .= " ORDER BY i.id DESC";
+
+    $invoices = $db->query($sql, $params)->getResultArray();
+
+    return view('invoice/invoices/index', [
+        'invoices'      => $invoices,
+        'status_filter' => $status
+    ]);
+}
 
     public function create()
     {
@@ -246,23 +247,27 @@ class Invoices extends BaseController
             ->with('success', 'Invoice updated successfully.');
     }
 
-    public function delete($id)
-    {
-        $this->im
-            ->where('invoice_id', $id)
-            ->delete();
+   public function delete($id)
+{
+    $invoice = $this->m->find($id);
 
-        (new PaymentModel())
-            ->where('invoice_id', $id)
-            ->delete();
-
-        $this->m->delete($id);
-
+    if (!$invoice) {
         return redirect()
             ->to(base_url('invoice/invoices'))
-            ->with('success', 'Invoice deleted');
+            ->with('error', 'Invoice not found.');
     }
 
+    // Invoice ko Trash me bhejo
+    $this->m->update($id, [
+        'status'       => 'trashed',
+        'trashed_at'   => date('Y-m-d H:i:s'),
+        'trash_reason' => 'Moved to Trash'
+    ]);
+
+    return redirect()
+        ->to(base_url('invoice/invoices'))
+        ->with('success', 'Invoice moved to Trash successfully.');
+}
     private function formData($inv)
     {
         return [
@@ -343,4 +348,48 @@ class Invoices extends BaseController
             ]);
         }
     }
+    public function trash()
+{
+    $db = \Config\Database::connect();
+
+    $invoices = $db->query("
+        SELECT i.*, c.display_name AS cname
+        FROM invoices i
+        LEFT JOIN customers c ON i.customer_id = c.id
+        WHERE i.status = 'trashed'
+        ORDER BY i.id DESC
+    ")->getResultArray();
+
+    return view('invoice/invoices/trash', [
+        'invoices' => $invoices
+    ]);
+}
+
+public function restore($id)
+{
+    $this->m->update($id, [
+        'status' => 'draft',
+        'trashed_at' => null,
+        'trash_reason' => null
+    ]);
+
+    return redirect()
+        ->to(base_url('invoice/invoices/trash'))
+        ->with('success', 'Invoice restored successfully.');
+}
+
+public function permanentDelete($id)
+{
+    $this->im->where('invoice_id', $id)->delete();
+
+    (new PaymentModel())
+        ->where('invoice_id', $id)
+        ->delete();
+
+    $this->m->delete($id);
+
+    return redirect()
+        ->to(base_url('invoice/invoices/trash'))
+        ->with('success', 'Invoice permanently deleted.');
+}
 }

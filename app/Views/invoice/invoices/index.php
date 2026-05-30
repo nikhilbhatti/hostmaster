@@ -188,6 +188,9 @@
     <h4>Invoices</h4>
 
     <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <a href="<?= base_url('invoice/invoices/trash') ?>" class="btn btn-warning">
+    🗑️ View Trash
+</a>
         <div style="display:flex; gap:6px; background:#f3f4f6; padding:4px; border-radius:8px;">
             <?php foreach(['' => 'All', 'draft' => 'Draft', 'sent' => 'Sent', 'partial' => 'Partial', 'paid' => 'Paid', 'overdue' => 'Overdue'] as $k => $v): ?>
                 <a href="<?= base_url('invoice/invoices' . ($k ? '?status=' . $k : '')) ?>"
@@ -195,6 +198,7 @@
                    style="border-radius:6px; font-weight:500; border:none; padding:6px 12px; font-size:13px; <?= ($status_filter ?? '') === $k ? '' : 'background:transparent; color:#4b5563;' ?>">
                     <?= esc($v) ?>
                 </a>
+                
             <?php endforeach; ?>
         </div>
 
@@ -308,7 +312,7 @@
                                         </a>
 
                                         <!-- Delete Button -->
-                                        <a href="<?= base_url('invoice/invoices/delete/' . $inv['id']) ?>" class="action-badge-btn btn-delete-custom" onclick="return confirm('Delete?')" title="Delete">
+                                        <a href="javascript:void(0)" class="action-badge-btn btn-delete-custom" onclick="openDeleteChoice('<?= $inv['id'] ?>')" title="Delete">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <polyline points="3 6 5 6 21 6"></polyline>
                                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -344,5 +348,48 @@
         </table>
     </div>
 </div>
+
+
+
+<!-- Delete Choice Modal -->
+<div class="modal fade" id="deleteChoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:18px; overflow:hidden;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" style="font-size:17px; font-weight:700; color:#111827;">Delete Invoice</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <p class="text-muted mb-3" style="font-size:13px; line-height:1.5;">
+                    Select what you want to do with this invoice.
+                </p>
+
+                <div class="d-grid gap-2">
+                    <a href="#" id="trashInvoiceBtn" class="btn btn-warning" style="border-radius:10px; font-weight:600;">
+                        🗑️ Move To Trash
+                    </a>
+
+                    <a href="#" id="permanentDeleteInvoiceBtn" class="btn btn-danger" style="border-radius:10px; font-weight:600;" onclick="return confirm('Permanent delete? This action cannot be undone.')">
+                        ❌ Permanent Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openDeleteChoice(id)
+{
+    document.getElementById('trashInvoiceBtn').href =
+        "<?= base_url('invoice/invoices/delete') ?>/" + id;
+
+    document.getElementById('permanentDeleteInvoiceBtn').href =
+        "<?= base_url('invoice/invoices/permanent-delete') ?>/" + id;
+
+    new bootstrap.Modal(document.getElementById('deleteChoiceModal')).show();
+}
+</script>
 
 <?= $this->endSection() ?>

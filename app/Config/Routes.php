@@ -84,25 +84,35 @@ $routes->group('', ['filter' => 'auth'], function($routes) {
     });
 
     // --- 6. Orders & Service Management ---
-    $routes->group('orders', function($routes) {
-        $routes->get('/', 'Orders::index');
-        $routes->get('add', 'Orders::add');
-        $routes->post('store', 'Orders::store');
-        $routes->get('view/(:num)', 'Orders::view/$1'); 
-        $routes->get('edit/(:num)', 'Orders::edit/$1');
-        $routes->post('update/(:num)', 'Orders::update/$1');
-        $routes->get('delete/(:num)', 'Orders::delete/$1');
-        
-        $routes->get('types', 'Orders::types');
-        $routes->post('save_type', 'Orders::save_type');
-        $routes->post('save_provider', 'Orders::save_provider');
-        $routes->get('delete_type/(:num)', 'Orders::delete_type/$1');
-        $routes->get('delete_provider/(:num)', 'Orders::delete_provider/$1');
-        
-        $routes->get('settings', 'Orders::settings');
-        $routes->post('updateSettings', 'Orders::updateSettings'); 
-        $routes->post('send-notice', 'Orders::sendNotice');
-    });
+  $routes->group('orders', function($routes) {
+
+$routes->get('/', 'Orders::index');
+$routes->get('add', 'Orders::add');
+$routes->post('store', 'Orders::store');
+$routes->get('view/(:num)', 'Orders::view/$1');
+$routes->get('edit/(:num)', 'Orders::edit/$1');
+$routes->post('update/(:num)', 'Orders::update/$1');
+$routes->get('delete/(:num)', 'Orders::delete/$1');
+
+// ===== NEW ARCHIVE ROUTES =====
+$routes->get('archive', 'Orders::archive');
+$routes->get('restore/(:num)', 'Orders::restore/$1');
+$routes->get('replace/(:num)', 'Orders::replace/$1');
+$routes->get('permanent-delete/(:num)', 'Orders::permanentDelete/$1');
+
+$routes->get('types', 'Orders::types');
+$routes->post('save_type', 'Orders::save_type');
+$routes->post('save_provider', 'Orders::save_provider');
+$routes->get('delete_type/(:num)', 'Orders::delete_type/$1');
+$routes->get('delete_provider/(:num)', 'Orders::delete_provider/$1');
+
+$routes->get('settings', 'Orders::settings');
+$routes->post('updateSettings', 'Orders::updateSettings');
+$routes->post('send-notice', 'Orders::sendNotice');
+
+
+});
+
 
     // --- 7. Backup Management (FIXED PATHS) ---
     // --- 7. Backup Management (FIXED & CLEAN) ---
@@ -345,17 +355,25 @@ $routes->group('invoice', ['namespace' => 'App\Controllers\Invoice'], function($
     |--------------------------------------------------------------------------
     */
 
-    $routes->get('invoices', 'Invoices::index');
+   $routes->get('invoices', 'Invoices::index');
 
-    $routes->get('invoices/create', 'Invoices::create');
-    $routes->post('invoices/store', 'Invoices::store');
+$routes->get('invoices/create', 'Invoices::create');
+$routes->post('invoices/store', 'Invoices::store');
 
-    $routes->get('invoices/show/(:num)', 'Invoices::show/$1');
+$routes->get('invoices/show/(:num)', 'Invoices::show/$1');
 
-    $routes->get('invoices/edit/(:num)', 'Invoices::edit/$1');
-    $routes->post('invoices/update/(:num)', 'Invoices::update/$1');
+$routes->get('invoices/edit/(:num)', 'Invoices::edit/$1');
+$routes->post('invoices/update/(:num)', 'Invoices::update/$1');
 
-    $routes->get('invoices/delete/(:num)', 'Invoices::delete/$1');
+/* Delete = Move To Trash */
+$routes->get('invoices/delete/(:num)', 'Invoices::delete/$1');
+
+/* Trash System */
+$routes->get('invoices/trash', 'Invoices::trash');
+$routes->get('invoices/restore/(:num)', 'Invoices::restore/$1');
+$routes->get('invoices/permanent-delete/(:num)', 'Invoices::permanentDelete/$1');
+
+/* AJAX Item */
 $routes->post('items/ajax-store', 'Items::ajaxStore');
 
     /*
