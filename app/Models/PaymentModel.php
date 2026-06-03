@@ -22,6 +22,8 @@ class PaymentModel extends Model
 
         'invoice_id',
 
+        'invoice_number',
+
         'payment_date',
 
         'amount',

@@ -59,7 +59,7 @@ textarea.zoho-control{height:auto;min-height:70px}
         Edit Payment <?= !empty($payment['payment_number']) ? '(' . esc($payment['payment_number']) . ')' : '' ?>
     </div>
 
-    <form method="POST" action="<?= base_url('invoice/payments/update/'.$payment['id']) ?>" class="zoho-form-body" enctype="multipart/form-data">
+    <form method="POST" action="<?= base_url('invoice/payments/update/'.$payment['id'] . ((isset($source) && $source === 'invoice') ? '?source=invoice' : '')) ?>" class="zoho-form-body" enctype="multipart/form-data">
         <?= csrf_field() ?>
 
         <?php if(session()->getFlashdata('errors')): ?>

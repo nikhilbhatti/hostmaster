@@ -245,6 +245,7 @@
                             $statusClass = in_array($statusKey, $allowedStatuses) ? 'status-' . $statusKey : 'status-default';
 
                             $statusLabel = ucwords(str_replace(['-', '_'], ' ', $statusKey));
+                            $isLockedInvoice = in_array($statusKey, ['paid', 'partial'], true);
                         ?>
 
                         <tr>
@@ -294,7 +295,7 @@
                                         </svg>
                                     </a>
 
-                                    <?php if ($statusKey !== 'paid'): ?>
+                                    <?php if (!$isLockedInvoice): ?>
                                         <!-- Edit Button -->
                                         <a href="<?= base_url('invoice/invoices/edit/' . $inv['id']) ?>" class="action-badge-btn btn-edit-custom" title="Edit">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -302,32 +303,34 @@
                                                 <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                                             </svg>
                                         </a>
-
-                                        <!-- Record Payment Button -->
-                                        <a href="<?= base_url('invoice/payments/create/' . $inv['id']) ?>" class="action-badge-btn btn-pay-custom" title="Record Payment">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                                                <line x1="1" y1="10" x2="23" y2="10"></line>
-                                            </svg>
-                                        </a>
-
-                                        <!-- Delete Button -->
-                                        <a href="javascript:void(0)" class="action-badge-btn btn-delete-custom" onclick="openDeleteChoice('<?= $inv['id'] ?>')" title="Delete">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                                            </svg>
-                                        </a>
                                     <?php else: ?>
-                                        <!-- Paid hone par Locked Disabled Icon dikhega -->
-                                        <span class="action-badge-btn btn-disabled-custom" title="Paid Invoices Cannot Be Modified">
+                                        <!-- Locked invoice (partial/paid): only edit disabled -->
+                                        <span class="action-badge-btn btn-disabled-custom" title="Paid or partially paid invoices cannot be edited.">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                             </svg>
                                         </span>
+                                    <?php endif; ?>
+
+                                    <!-- Delete Button -->
+                                    <a href="javascript:void(0)" class="action-badge-btn btn-delete-custom" title="Choose trash or permanent delete" onclick="openDeleteChoice('<?= $inv['id'] ?>'); return false;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                    </a>
+
+                                    <?php if ($statusKey !== 'paid'): ?>
+                                        <!-- Record Payment Button -->
+                                        <a href="<?= base_url('invoice/payments/create-for-invoice/' . $inv['id']) ?>" class="action-badge-btn btn-pay-custom" title="Record Payment">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                                <line x1="1" y1="10" x2="23" y2="10"></line>
+                                            </svg>
+                                        </a>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -362,7 +365,7 @@
 
             <div class="modal-body p-4">
                 <p class="text-muted mb-3" style="font-size:13px; line-height:1.5;">
-                    Select what you want to do with this invoice.
+                    Choose how to delete this invoice. Payments are not deleted automatically; if you want to remove payment records, do that separately from the payment screen.
                 </p>
 
                 <div class="d-grid gap-2">
@@ -383,10 +386,10 @@
 function openDeleteChoice(id)
 {
     document.getElementById('trashInvoiceBtn').href =
-        "<?= base_url('invoice/invoices/delete') ?>/" + id;
+        "<?= base_url('invoice/invoices/delete') ?>/" + id + '?redirect=invoiceIndex';
 
     document.getElementById('permanentDeleteInvoiceBtn').href =
-        "<?= base_url('invoice/invoices/permanent-delete') ?>/" + id;
+        "<?= base_url('invoice/invoices/permanent-delete') ?>/" + id + '?redirect=invoiceIndex';
 
     new bootstrap.Modal(document.getElementById('deleteChoiceModal')).show();
 }

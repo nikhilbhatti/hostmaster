@@ -446,6 +446,12 @@ cat > /mnt/user-data/outputs/index.php << 'PHPEOF'
                 </div>
             </div>
 
+            <?php if ($status !== 'trashed'): ?>
+                <div style="margin:0 24px 20px;padding:14px 16px;border:1px solid #fde68a;background:#fef9c3;border-radius:10px;color:#92400e;font-size:14px;">
+                    ⚠️ Invoice is active. Direct payment edit/delete from the payment history screen will be blocked until the invoice is trashed. Invoice delete from the invoice screen does not remove payments automatically.
+                </div>
+            <?php endif; ?>
+
             <!-- Receipt sheet -->
             <div class="canvas-scroll-container">
                 <div class="receipt-a4-sheet">

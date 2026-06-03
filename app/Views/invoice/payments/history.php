@@ -49,6 +49,12 @@ $balance      = (float)($invoice['balance_due'] ?? max(0, $total - $paid));
 $status       = strtolower($invoice['status'] ?? 'unpaid');
 $statusClass  = 'status-' . $status;
 $isPaid       = ($status === 'paid');
+$sourceInvoice = isset($source) && strtolower(trim($source)) === 'invoice';
+$returnQuery = $sourceInvoice ? '?source=invoice&return=history' : '?return=history';
+$isDirectRestricted = !$sourceInvoice && $status === 'trashed';
+$historyBackUrl = $sourceInvoice
+    ? base_url('invoice/invoices/show/' . $invoice['id'] . '?source=invoice')
+    : base_url('invoice/payments');
 ?>
 
 <div class="history-page">
@@ -63,7 +69,7 @@ $isPaid       = ($status === 'paid');
             </div>
         </div>
 
-        <a href="<?= base_url('invoice/payments') ?>" class="btn-back">
+        <a href="<?= esc($historyBackUrl) ?>" class="btn-back">
             ← Back to Payments
         </a>
     </div>
@@ -115,6 +121,12 @@ $isPaid       = ($status === 'paid');
             <?php endif; ?>
         </div>
     </div>
+
+    <?php if ($isDirectRestricted): ?>
+        <div style="margin:0 28px 24px;padding:16px;border:1px solid #f1c40f;background:#fffbeb;border-radius:10px;color:#92400e;font-size:14px;">
+            ⚠️ This invoice is deleted/trashed. Payment edit/delete is blocked on this screen.
+        </div>
+    <?php endif; ?>
 
     <div class="table-wrap">
 
@@ -185,14 +197,14 @@ $isPaid       = ($status === 'paid');
                         </td>
 
                         <td>
-                            <?php if($isPaid): ?>
+                            <?php if($isDirectRestricted): ?>
                                 <span class="disabled-action">Edit</span>
                                 |
                                 <span class="disabled-action">Delete</span>
                             <?php else: ?>
-                                <a href="<?= base_url('invoice/payments/edit/' . $p['id']) ?>" style="color:#2563eb;font-weight:700;text-decoration:none;">Edit</a>
+                                <a href="<?= base_url('invoice/payments/edit/' . $p['id']) . $returnQuery ?>" style="color:#2563eb;font-weight:700;text-decoration:none;">Edit</a>
                                 |
-                                <a href="<?= base_url('invoice/payments/delete/' . $p['id']) ?>" onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')" style="color:#dc2626;font-weight:700;text-decoration:none;">Delete</a>
+                                <a href="<?= base_url('invoice/payments/delete/' . $p['id']) . $returnQuery ?>" onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')" style="color:#dc2626;font-weight:700;text-decoration:none;">Delete</a>
                             <?php endif; ?>
                         </td>
                     </tr>

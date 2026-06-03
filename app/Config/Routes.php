@@ -400,6 +400,8 @@ $routes->post('items/ajax-store', 'Items::ajaxStore');
 
     $routes->post('payments/store', 'Payments::store');
 
+    $routes->post('payments/bulk-delete', 'Payments::bulkDelete');
+
     $routes->get(
         'payments/history/(:num)',
         'Payments::history/$1'

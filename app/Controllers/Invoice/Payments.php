@@ -70,6 +70,53 @@ class Payments extends BaseController
         ]);
     }
 
+    private function isInvoicePaymentLocked(array $invoice = null): bool
+    {
+        if (empty($invoice)) {
+            return false;
+        }
+
+        $status = strtolower(trim($invoice['status'] ?? ''));
+
+        return in_array($status, ['paid', 'partial', 'partially_paid'], true)
+            || (float)($invoice['paid_amount'] ?? 0) > 0;
+    }
+
+    private function isInvoiceDeletedForDirectPayment(array $payment = null): bool
+    {
+        if (empty($payment) || empty($payment['invoice_id'])) {
+            return false;
+        }
+
+        $invoice = (new InvoiceModel())->find($payment['invoice_id']);
+
+        if (empty($invoice)) {
+            return false;
+        }
+
+        $status = strtolower(trim($invoice['status'] ?? ''));
+
+        return $status === 'trashed';
+    }
+
+    private function isPaymentActionAllowed(array $payment = null): bool
+    {
+        if (empty($payment) || empty($payment['invoice_id'])) {
+            return true;
+        }
+
+        $source = strtolower(trim($this->request->getGet('source') ?? ''));
+        if ($source === 'invoice') {
+            return true;
+        }
+
+        if ($this->isInvoiceDeletedForDirectPayment($payment)) {
+            return false;
+        }
+
+        return true;
+    }
+
     private function invoiceLedgerQuery()
     {
         $db = \Config\Database::connect();
@@ -90,13 +137,11 @@ class Payments extends BaseController
             FROM invoices i
             LEFT JOIN customers c ON c.id = i.customer_id
             LEFT JOIN payments p ON p.invoice_id = i.id
-            WHERE 
-                i.id IN (
-                    SELECT DISTINCT invoice_id 
-                    FROM payments 
-                    WHERE invoice_id IS NOT NULL
-                )
-                OR i.status != 'draft'
+            WHERE i.id IN (
+                SELECT DISTINCT invoice_id 
+                FROM payments 
+                WHERE invoice_id IS NOT NULL
+            )
             GROUP BY 
                 i.id,
                 i.invoice_number,
@@ -107,7 +152,33 @@ class Payments extends BaseController
                 i.status,
                 c.display_name,
                 c.company_name
-            ORDER BY i.id DESC
+
+            UNION ALL
+
+            SELECT 
+                p.invoice_id AS invoice_id,
+                COALESCE(p.invoice_number, CONCAT('Deleted Invoice #', p.invoice_id)) AS invoice_number,
+                NULL AS invoice_date,
+                0 AS total,
+                SUM(p.amount) AS paid_amount,
+                0 AS balance_due,
+                'partially_paid' AS status,
+                COALESCE(c.display_name, 'Deleted Customer') AS cname,
+                COALESCE(c.company_name, '') AS company_name,
+                MAX(p.payment_date) AS last_payment_date,
+                COUNT(p.id) AS payment_count
+            FROM payments p
+            LEFT JOIN invoices i ON i.id = p.invoice_id
+            LEFT JOIN customers c ON c.id = p.customer_id
+            WHERE p.invoice_id IS NOT NULL
+                AND i.id IS NULL
+            GROUP BY 
+                p.invoice_id,
+                COALESCE(p.invoice_number, CONCAT('Deleted Invoice #', p.invoice_id)),
+                COALESCE(c.display_name, 'Deleted Customer'),
+                COALESCE(c.company_name, '')
+
+            ORDER BY invoice_id DESC
         ")->getResultArray();
     }
 
@@ -156,7 +227,7 @@ class Payments extends BaseController
 
         if (!$inv) {
             return redirect()
-                ->to(base_url('invoice/payments/indexpage'))
+                ->to(base_url('invoice/payments'))
                 ->with('error', 'Invoice not found.');
         }
 
@@ -206,10 +277,17 @@ class Payments extends BaseController
                     continue;
                 }
 
+                $invoiceRow = $db->table('invoices')
+                    ->select('invoice_number')
+                    ->where('id', $current_inv_id)
+                    ->get()
+                    ->getRowArray();
+
                 $this->m->insert([
                     'payment_number' => $pn,
                     'customer_id'    => $customer_id,
                     'invoice_id'     => $current_inv_id,
+                    'invoice_number' => $invoiceRow['invoice_number'] ?? null,
                     'payment_date'   => $paymentDate,
                     'amount'         => $allocated_val,
                     'payment_mode'   => $paymentMode,
@@ -223,10 +301,17 @@ class Payments extends BaseController
 
         } elseif (!empty($inv_id) && $amount > 0) {
 
+            $invoiceRow = $db->table('invoices')
+                ->select('invoice_number')
+                ->where('id', $inv_id)
+                ->get()
+                ->getRowArray();
+
             $this->m->insert([
                 'payment_number' => $pn,
                 'customer_id'    => $customer_id,
                 'invoice_id'     => $inv_id,
+                'invoice_number' => $invoiceRow['invoice_number'] ?? null,
                 'payment_date'   => $paymentDate,
                 'amount'         => $amount,
                 'payment_mode'   => $paymentMode,
@@ -243,6 +328,7 @@ class Payments extends BaseController
                 'payment_number' => $pn,
                 'customer_id'    => $customer_id,
                 'invoice_id'     => null,
+                'invoice_number' => null,
                 'payment_date'   => $paymentDate,
                 'amount'         => $amount,
                 'payment_mode'   => $paymentMode,
@@ -263,7 +349,7 @@ class Payments extends BaseController
         }
 
         return redirect()
-            ->to(base_url('invoice/payments/indexpage'))
+            ->to(base_url('invoice/payments'))
             ->with('success', 'Payment ' . $pn . ' recorded successfully.');
     }
 
@@ -280,46 +366,56 @@ public function history($invoice_id)
             c.mobile AS phone
         FROM invoices i
         LEFT JOIN customers c 
-        ON c.id = i.customer_id
+            ON c.id = i.customer_id
         WHERE i.id = ?
     ", [$invoice_id])->getRowArray();
-
-    if (!$invoice) {
-
-        return redirect()
-            ->to(base_url('invoice/payments/indexpage'))
-            ->with('error', 'Invoice not found.');
-    }
 
     $payments = $db->query("
         SELECT 
             p.*,
-            i.invoice_number,
-            c.display_name AS cname
+            COALESCE(i.invoice_number, p.invoice_number) AS invoice_number,
+            COALESCE(c.display_name, 'Deleted Customer') AS cname,
+            COALESCE(c.company_name, '') AS company_name
         FROM payments p
-
         LEFT JOIN invoices i 
-        ON i.id = p.invoice_id
-
+            ON i.id = p.invoice_id
         LEFT JOIN customers c 
-        ON c.id = p.customer_id
-
+            ON c.id = p.customer_id
         WHERE p.invoice_id = ?
-
         ORDER BY 
             p.payment_date ASC,
             p.id ASC
-
     ", [$invoice_id])->getResultArray();
 
+    if (!$invoice) {
+        if (empty($payments)) {
+            return redirect()
+                ->to(base_url('invoice/payments'))
+                ->with('error', 'Invoice not found.');
+        }
+
+        $paidAmount = array_sum(array_column($payments, 'amount'));
+        $firstPayment = $payments[0];
+
+        $invoice = [
+            'id' => $invoice_id,
+            'invoice_number' => $firstPayment['invoice_number'] ?? ('Deleted Invoice #' . $invoice_id),
+            'total' => 0,
+            'paid_amount' => $paidAmount,
+            'balance_due' => 0,
+            'status' => 'partially_paid',
+            'cname' => $firstPayment['cname'] ?? 'Deleted Customer',
+            'company_name' => $firstPayment['company_name'] ?? ''
+        ];
+    }
+
     return view('invoice/payments/history', [
-
-        'invoice'  => $invoice,
-
-        'payments' => $payments
-
+        'invoice' => $invoice,
+        'payments' => $payments,
+        'source' => strtolower(trim($this->request->getGet('source') ?? ''))
     ]);
 }
+
     public function get_unpaid_invoices($customer_id)
     {
         $db = \Config\Database::connect();
@@ -404,8 +500,14 @@ public function history($invoice_id)
 
         if (!$payment) {
             return redirect()
-                ->to(base_url('invoice/payments/indexpage'))
+                ->to(base_url('invoice/payments'))
                 ->with('error', 'Payment not found.');
+        }
+
+        if (!$this->isPaymentActionAllowed($payment)) {
+            return redirect()
+                ->back()
+                ->with('error', 'Payment delete is blocked on this screen while the invoice is active.');
         }
 
         $invoice_id = $payment['invoice_id'] ?? null;
@@ -416,9 +518,85 @@ public function history($invoice_id)
             $this->recalculateInvoice($invoice_id);
         }
 
+        $source = strtolower(trim($this->request->getGet('source') ?? ''));
+        $returnTo = strtolower(trim($this->request->getGet('return') ?? ''));
+
+        if (!empty($invoice_id) && $returnTo === 'history') {
+            $redirectUrl = base_url('invoice/payments/history/' . $invoice_id)
+                . ($source === 'invoice' ? '?source=invoice' : '');
+        } elseif ($source === 'invoice' && !empty($invoice_id)) {
+            $redirectUrl = base_url('invoice/invoices/show/' . $invoice_id . '?source=invoice');
+        } else {
+            $redirectUrl = base_url('invoice/payments');
+        }
+
         return redirect()
-            ->to(base_url('invoice/payments/indexpage'))
+            ->to($redirectUrl)
             ->with('success', 'Payment deleted and invoice balance updated.');
+    }
+
+    public function bulkDelete()
+    {
+        $selected = $this->request->getPost('selected_invoices');
+
+        if (empty($selected) || !is_array($selected)) {
+            return redirect()
+                ->back()
+                ->with('error', 'Please select at least one invoice row to delete.');
+        }
+
+        $selectedIds = array_filter(array_map('intval', $selected), fn($id) => $id > 0);
+
+        if (empty($selectedIds)) {
+            return redirect()
+                ->back()
+                ->with('error', 'Invalid selection. Please choose a valid invoice row.');
+        }
+
+        $invoiceModel = new InvoiceModel();
+        $existingInvoices = $invoiceModel->whereIn('id', $selectedIds)->findAll();
+
+        foreach ($existingInvoices as $invoice) {
+            if ($this->isInvoicePaymentLocked($invoice)) {
+                return redirect()
+                    ->back()
+                    ->with('error', 'Locked invoices can only be modified from the related invoice screen.');
+            }
+        }
+
+        $db = \Config\Database::connect();
+        $payments = $db->table('payments')
+            ->select('id, invoice_id')
+            ->whereIn('invoice_id', $selectedIds)
+            ->get()
+            ->getResultArray();
+
+        if (empty($payments)) {
+            return redirect()
+                ->back()
+                ->with('error', 'No payments found for the selected invoice rows.');
+        }
+
+        $paymentIds = array_column($payments, 'id');
+        $invoiceIds = array_unique(array_column($payments, 'invoice_id'));
+
+        $db->transStart();
+        $this->m->delete($paymentIds);
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to delete selected payments.');
+        }
+
+        foreach ($invoiceIds as $invoiceId) {
+            $this->recalculateInvoice($invoiceId);
+        }
+
+        return redirect()
+            ->to(base_url('invoice/payments'))
+            ->with('success', 'Selected payments deleted and invoice balances updated.');
     }
 
     public function edit($id = null)
@@ -433,8 +611,15 @@ public function history($invoice_id)
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Payment not found");
         }
 
+        if (!$this->isPaymentActionAllowed($data['payment'])) {
+            return redirect()
+                ->back()
+                ->with('error', 'Payment edit is blocked on this screen while the invoice is active.');
+        }
+
         $data['customers'] = $customerModel->findAll();
         $data['invoices']  = $invoiceModel->findAll();
+        $data['source']    = strtolower(trim($this->request->getGet('source') ?? ''));
 
         return view('invoice/payments/edit', $data);
     }
@@ -442,13 +627,20 @@ public function history($invoice_id)
     public function update($id = null)
     {
         $paymentModel = new PaymentModel();
+        $db = \Config\Database::connect();
 
         $oldPayment = $paymentModel->find($id);
 
         if (!$oldPayment) {
             return redirect()
-                ->to(base_url('invoice/payments/indexpage'))
+                ->to(base_url('invoice/payments'))
                 ->with('error', 'Payment not found.');
+        }
+
+        if (!$this->isPaymentActionAllowed($oldPayment)) {
+            return redirect()
+                ->back()
+                ->with('error', 'Payment update is blocked on this screen while the invoice is active.');
         }
 
         $rules = [
@@ -466,14 +658,27 @@ public function history($invoice_id)
 
         $oldInvoiceId = $oldPayment['invoice_id'];
 
+        $invoiceIdUpdate = $this->request->getPost('invoice_id');
+        $invoiceNumberUpdate = null;
+
+        if (!empty($invoiceIdUpdate)) {
+            $invoiceRow = $db->table('invoices')
+                ->select('invoice_number')
+                ->where('id', $invoiceIdUpdate)
+                ->get()
+                ->getRowArray();
+            $invoiceNumberUpdate = $invoiceRow['invoice_number'] ?? null;
+        }
+
         $updateData = [
-            'customer_id'  => $this->request->getPost('customer_id'),
-            'invoice_id'   => $this->request->getPost('invoice_id'),
-            'amount'       => $this->request->getPost('amount'),
-            'payment_date' => $this->request->getPost('payment_date'),
-            'payment_mode' => $this->request->getPost('payment_mode'),
-            'reference'    => $this->request->getPost('reference'),
-            'notes'        => $this->request->getPost('notes')
+            'customer_id'    => $this->request->getPost('customer_id'),
+            'invoice_id'     => $invoiceIdUpdate,
+            'invoice_number' => $invoiceNumberUpdate,
+            'amount'         => $this->request->getPost('amount'),
+            'payment_date'   => $this->request->getPost('payment_date'),
+            'payment_mode'   => $this->request->getPost('payment_mode'),
+            'reference'      => $this->request->getPost('reference'),
+            'notes'          => $this->request->getPost('notes')
         ];
 
         if ($paymentModel->update($id, $updateData)) {
@@ -486,8 +691,20 @@ public function history($invoice_id)
                 $this->recalculateInvoice($updateData['invoice_id']);
             }
 
+            $source = strtolower(trim($this->request->getGet('source') ?? ''));
+            $returnTo = strtolower(trim($this->request->getGet('return') ?? ''));
+
+            if (!empty($updateData['invoice_id']) && $returnTo === 'history') {
+                $redirectUrl = base_url('invoice/payments/history/' . $updateData['invoice_id'])
+                    . ($source === 'invoice' ? '?source=invoice' : '');
+            } elseif ($source === 'invoice' && !empty($updateData['invoice_id'])) {
+                $redirectUrl = base_url('invoice/payments/history/' . $updateData['invoice_id'] . '?source=invoice');
+            } else {
+                $redirectUrl = base_url('invoice/payments');
+            }
+
             return redirect()
-                ->to(base_url('invoice/payments/indexpage'))
+                ->to($redirectUrl)
                 ->with('success', 'Payment updated successfully!');
         }
 

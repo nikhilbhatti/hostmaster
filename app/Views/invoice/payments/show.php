@@ -173,6 +173,33 @@ input[type="checkbox"]{
     height:16px;
     cursor:pointer;
 }
+
+.payments-bulk-actions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:12px;
+    padding:14px 28px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    margin:0 28px 18px;
+}
+
+.btn-delete-selected{
+    background:#dc2626;
+    color:#fff;
+    border:none;
+    padding:10px 18px;
+    border-radius:6px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.btn-delete-selected:hover{
+    background:#b91c1c;
+}
 </style>
 
 <div class="payments-page">
@@ -194,7 +221,20 @@ input[type="checkbox"]{
 
     </div>
 
-    <div class="payments-table-wrap">
+    <form id="bulkDeleteForm" method="POST" action="<?= base_url('invoice/payments/bulk-delete') ?>">
+        <?= csrf_field() ?>
+
+        <div id="bulkActions" class="payments-bulk-actions" style="display:none;">
+            <div style="margin-right:16px; color:#b91c1c; font-weight:600; font-size:13px;">
+                Warning: Deleting selected payment records is permanent. Check partial payment invoices carefully before continuing.
+            </div>
+            <span id="bulkSelectedCount">0 selected</span>
+            <button type="submit" class="btn-delete-selected" onclick="return confirm('Warning: deleting selected payment records will permanently remove them. If invoices have partial payments, verify the amounts before continuing.')">
+                Delete Selected
+            </button>
+        </div>
+
+        <div class="payments-table-wrap">
 
         <table class="payments-table">
 
@@ -203,7 +243,7 @@ input[type="checkbox"]{
                 <tr>
 
                     <th class="checkbox-col">
-                        <input type="checkbox">
+                        <input type="checkbox" id="selectAllInvoices" onchange="toggleSelectAll(this)">
                     </th>
 
                     <th>Invoice #</th>
@@ -253,18 +293,19 @@ input[type="checkbox"]{
                         }
                     ?>
 
-                    <tr onclick="window.location.href='<?= base_url('invoice/payments?active_id=' . $invoiceId) ?>'">
+                    <?php $targetUrl = ($status === 'deleted') ? base_url('invoice/payments/history/' . $invoiceId) : base_url('invoice/invoices/show/' . $invoiceId); ?>
+                    <tr onclick="window.location.href='<?= $targetUrl ?>'">
 
                         <td class="checkbox-col"
                             onclick="event.stopPropagation();">
 
-                            <input type="checkbox">
+                            <input type="checkbox" name="selected_invoices[]" value="<?= esc($invoiceId) ?>" onchange="updateBulkActions();" onclick="event.stopPropagation();">
 
                         </td>
 
                         <td>
 
-                            <a href="<?= base_url('invoice/invoices/show/' . $invoiceId) ?>"
+                            <a href="<?= $targetUrl ?>"
                                class="payment-link"
                                onclick="event.stopPropagation();">
 
@@ -360,7 +401,40 @@ input[type="checkbox"]{
         </table>
 
     </div>
+    </form>
 
 </div>
+
+<script>
+    function updateBulkActions() {
+        const checkboxes = Array.from(document.querySelectorAll('input[name="selected_invoices[]"]'));
+        const checked = checkboxes.filter(cb => cb.checked);
+        const bulkActions = document.getElementById('bulkActions');
+        const bulkSelectedCount = document.getElementById('bulkSelectedCount');
+        const selectAll = document.getElementById('selectAllInvoices');
+
+        if (checked.length > 0) {
+            bulkActions.style.display = 'flex';
+        } else {
+            bulkActions.style.display = 'none';
+        }
+
+        bulkSelectedCount.textContent = checked.length + ' selected';
+
+        if (selectAll) {
+            selectAll.checked = checked.length > 0 && checked.length === checkboxes.length;
+        }
+    }
+
+    function toggleSelectAll(master) {
+        const checkboxes = document.querySelectorAll('input[name="selected_invoices[]"]');
+        checkboxes.forEach(cb => { cb.checked = master.checked; });
+        updateBulkActions();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateBulkActions();
+    });
+</script>
 
 <?= $this->endSection() ?>

@@ -26,6 +26,7 @@ function numToWordsINR($n) {
 }
 $total_words = numToWordsINR($inv['total']);
 $is_paid = strtolower($inv['status']) === 'paid';
+$is_locked = in_array(strtolower($inv['status']), ['paid', 'partial', 'partially_paid'], true);
 ?>
 
 <style>
@@ -243,13 +244,13 @@ $is_paid = strtolower($inv['status']) === 'paid';
             </a>
         <?php endif; ?>
 
-        <a href="<?= base_url('invoice/payments/history/'.$inv['id']) ?>"
+        <a href="<?= base_url('invoice/payments/history/'.$inv['id'] . '?source=invoice') ?>"
            class="btn btn-outline">
             <i class="bi bi-clock-history"></i> Payment History
         </a>
 
-        <?php if($is_paid): ?>
-            <!-- PAID: Edit disabled -->
+        <?php if($is_locked): ?>
+            <!-- Partial/Paid: Edit disabled -->
             <span class="btn-disabled">
                 <i class="bi bi-pencil"></i> Edit
             </span>
@@ -461,7 +462,7 @@ $is_paid = strtolower($inv['status']) === 'paid';
 <div class="card no-print" style="margin-top:20px">
     <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
         <h5>Payments Received</h5>
-        <a href="<?= base_url('invoice/payments/history/'.$inv['id']) ?>" class="btn btn-outline">
+        <a href="<?= base_url('invoice/payments/history/'.$inv['id'].'?source=invoice') ?>" class="btn btn-outline">
             View Full History
         </a>
     </div>
@@ -505,23 +506,16 @@ $is_paid = strtolower($inv['status']) === 'paid';
                             ₹<?= number_format((float)($p['amount'] ?? 0), 2) ?>
                         </td>
                         <td>
-                            <?php if($is_paid): ?>
-                                <!-- PAID: Edit & Delete locked -->
-                                <span style="color:#9ca3af;font-size:13px;display:flex;align-items:center;gap:5px;">
-                                    <i class="bi bi-lock-fill" style="font-size:12px;"></i> Locked
-                                </span>
-                            <?php else: ?>
-                                <a href="<?= base_url('invoice/payments/edit/'.$p['id']) ?>"
-                                   style="color:#2563eb;font-weight:600;text-decoration:none;">
-                                    Edit
-                                </a>
-                                &nbsp;|&nbsp;
-                                <a href="<?= base_url('invoice/payments/delete/'.$p['id']) ?>"
-                                   onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')"
-                                   style="color:#dc2626;font-weight:600;text-decoration:none;">
-                                    Delete
-                                </a>
-                            <?php endif; ?>
+                            <a href="<?= base_url('invoice/payments/edit/'.$p['id'] . '?source=invoice') ?>"
+                               style="color:#2563eb;font-weight:600;text-decoration:none;">
+                                Edit
+                            </a>
+                            &nbsp;|&nbsp;
+                            <a href="<?= base_url('invoice/payments/delete/'.$p['id'] . '?source=invoice') ?>"
+                               onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')"
+                               style="color:#dc2626;font-weight:600;text-decoration:none;">
+                                Delete
+                            </a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
