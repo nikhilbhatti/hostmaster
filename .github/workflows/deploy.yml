@@ -19,7 +19,7 @@ jobs:
           server: 82.112.232.206
           username: u477483561
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
           port: 21
           local-dir: ./
           server-dir: /domains/slysis.com/public_html/master/
