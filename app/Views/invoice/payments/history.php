@@ -49,6 +49,8 @@ $balance      = (float)($invoice['balance_due'] ?? max(0, $total - $paid));
 $status       = strtolower($invoice['status'] ?? 'unpaid');
 $statusClass  = 'status-' . $status;
 $isPaid       = ($status === 'paid');
+$latestPaymentId = isset($latestPaymentId) ? $latestPaymentId : null;
+$paymentCount = isset($paymentCount) ? $paymentCount : count($payments);
 $sourceInvoice = isset($source) && strtolower(trim($source)) === 'invoice';
 $returnQuery = $sourceInvoice ? '?source=invoice&return=history' : '?return=history';
 $isDirectRestricted = !$sourceInvoice && $status === 'trashed';
@@ -202,7 +204,12 @@ $historyBackUrl = $sourceInvoice
                                 |
                                 <span class="disabled-action">Delete</span>
                             <?php else: ?>
-                                <a href="<?= base_url('invoice/payments/edit/' . $p['id']) . $returnQuery ?>" style="color:#2563eb;font-weight:700;text-decoration:none;">Edit</a>
+                                <?php $canEditPayment = ($paymentCount <= 1 || $p['id'] === $latestPaymentId); ?>
+                                <?php if($canEditPayment): ?>
+                                    <a href="<?= base_url('invoice/payments/edit/' . $p['id']) . $returnQuery ?>" style="color:#2563eb;font-weight:700;text-decoration:none;">Edit</a>
+                                <?php else: ?>
+                                    <span class="disabled-action" title="Delete the latest payment first to edit this record">Edit</span>
+                                <?php endif; ?>
                                 |
                                 <a href="<?= base_url('invoice/payments/delete/' . $p['id']) . $returnQuery ?>" onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')" style="color:#dc2626;font-weight:700;text-decoration:none;">Delete</a>
                             <?php endif; ?>

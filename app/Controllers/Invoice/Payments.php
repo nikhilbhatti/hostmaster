@@ -99,14 +99,43 @@ class Payments extends BaseController
         return $status === 'trashed';
     }
 
-    private function isPaymentActionAllowed(array $payment = null): bool
+    private function isPaymentLatest(array $payment = null): bool
     {
         if (empty($payment) || empty($payment['invoice_id'])) {
             return true;
         }
 
-        $source = strtolower(trim($this->request->getGet('source') ?? ''));
-        if ($source === 'invoice') {
+        $latest = $this->m
+            ->where('invoice_id', $payment['invoice_id'])
+            ->orderBy('payment_date', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->first();
+
+        return !empty($latest) && $latest['id'] === $payment['id'];
+    }
+
+    private function isPaymentEditAllowed(array $payment = null): bool
+    {
+        if (empty($payment) || empty($payment['invoice_id'])) {
+            return true;
+        }
+
+        if ($this->isInvoiceDeletedForDirectPayment($payment)) {
+            return false;
+        }
+
+        $count = $this->m->where('invoice_id', $payment['invoice_id'])->countAllResults();
+
+        if ($count <= 1) {
+            return true;
+        }
+
+        return $this->isPaymentLatest($payment);
+    }
+
+    private function isPaymentDeleteAllowed(array $payment = null): bool
+    {
+        if (empty($payment) || empty($payment['invoice_id'])) {
             return true;
         }
 
@@ -387,6 +416,9 @@ public function history($invoice_id)
             p.id ASC
     ", [$invoice_id])->getResultArray();
 
+    $latestPaymentId = !empty($payments) ? end($payments)['id'] : null;
+    $paymentCount = count($payments);
+
     if (!$invoice) {
         if (empty($payments)) {
             return redirect()
@@ -412,6 +444,8 @@ public function history($invoice_id)
     return view('invoice/payments/history', [
         'invoice' => $invoice,
         'payments' => $payments,
+        'latestPaymentId' => $latestPaymentId,
+        'paymentCount' => $paymentCount,
         'source' => strtolower(trim($this->request->getGet('source') ?? ''))
     ]);
 }
@@ -504,7 +538,7 @@ public function history($invoice_id)
                 ->with('error', 'Payment not found.');
         }
 
-        if (!$this->isPaymentActionAllowed($payment)) {
+        if (!$this->isPaymentDeleteAllowed($payment)) {
             return redirect()
                 ->back()
                 ->with('error', 'Payment delete is blocked on this screen while the invoice is active.');
@@ -532,7 +566,7 @@ public function history($invoice_id)
 
         return redirect()
             ->to($redirectUrl)
-            ->with('success', 'Payment deleted and invoice balance updated.');
+            ->with('success', 'Payment deleted and invoice balance updated. If no payments remain, the invoice can be edited or deleted from the invoice screen.');
     }
 
     public function bulkDelete()
@@ -557,10 +591,11 @@ public function history($invoice_id)
         $existingInvoices = $invoiceModel->whereIn('id', $selectedIds)->findAll();
 
         foreach ($existingInvoices as $invoice) {
-            if ($this->isInvoicePaymentLocked($invoice)) {
+            $status = strtolower(trim($invoice['status'] ?? ''));
+            if ($status === 'trashed') {
                 return redirect()
                     ->back()
-                    ->with('error', 'Locked invoices can only be modified from the related invoice screen.');
+                    ->with('error', 'Payments for trashed invoices cannot be deleted from this screen.');
             }
         }
 
@@ -596,7 +631,7 @@ public function history($invoice_id)
 
         return redirect()
             ->to(base_url('invoice/payments'))
-            ->with('success', 'Selected payments deleted and invoice balances updated.');
+            ->with('success', 'Selected payments deleted and invoice balances updated. If no payments remain, the invoice can be edited or deleted from the invoice screen.');
     }
 
     public function edit($id = null)
@@ -611,10 +646,10 @@ public function history($invoice_id)
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Payment not found");
         }
 
-        if (!$this->isPaymentActionAllowed($data['payment'])) {
+        if (!$this->isPaymentEditAllowed($data['payment'])) {
             return redirect()
                 ->back()
-                ->with('error', 'Payment edit is blocked on this screen while the invoice is active.');
+                ->with('error', 'This payment cannot be edited because a newer payment exists. Delete the latest payment first.');
         }
 
         $data['customers'] = $customerModel->findAll();
@@ -637,10 +672,10 @@ public function history($invoice_id)
                 ->with('error', 'Payment not found.');
         }
 
-        if (!$this->isPaymentActionAllowed($oldPayment)) {
+        if (!$this->isPaymentEditAllowed($oldPayment)) {
             return redirect()
                 ->back()
-                ->with('error', 'Payment update is blocked on this screen while the invoice is active.');
+                ->with('error', 'This payment cannot be updated because a newer payment exists. Delete the latest payment first.');
         }
 
         $rules = [

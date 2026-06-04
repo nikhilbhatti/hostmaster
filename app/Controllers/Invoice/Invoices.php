@@ -29,8 +29,16 @@ class Invoices extends BaseController
 
         $status = strtolower(trim($invoice['status'] ?? ''));
 
-        return in_array($status, ['paid', 'partial', 'partially_paid'], true)
-            || (float)($invoice['paid_amount'] ?? 0) > 0;
+        return $status === 'trashed';
+    }
+
+    private function invoiceHasPayments(int $invoiceId): bool
+    {
+        $paymentModel = new PaymentModel();
+
+        return $paymentModel
+            ->where('invoice_id', $invoiceId)
+            ->countAllResults() > 0;
     }
 
     public function index()
@@ -167,15 +175,20 @@ class Invoices extends BaseController
             SELECT * 
             FROM payments 
             WHERE invoice_id = ? 
-            ORDER BY id DESC
+            ORDER BY payment_date ASC, id ASC
         ", [$id])->getResultArray();
+
+        $latestPaymentId = !empty($payments) ? end($payments)['id'] : null;
+        $paymentCount = count($payments);
 
         return view('invoice/invoices/show', [
             'inv'      => $inv,
             'items'    => $this->im
                 ->where('invoice_id', $id)
                 ->findAll(),
-            'payments' => $payments
+            'payments' => $payments,
+            'latestPaymentId' => $latestPaymentId,
+            'paymentCount' => $paymentCount
         ]);
     }
 
@@ -216,7 +229,7 @@ class Invoices extends BaseController
     if ($this->isInvoiceLocked($oldInvoice)) {
         return redirect()
             ->back()
-            ->with('error', 'Invoice cannot be updated after payment has been received. Remove payment first.');
+            ->with('error', 'Invoice cannot be edited because it has been trashed. Restore the invoice first.');
     }
 
     $invoiceNumber = trim((string)$this->request->getPost('invoice_number'));
@@ -287,10 +300,15 @@ class Invoices extends BaseController
             ->with('error', 'Invoice not found.');
     }
 
+    if ($this->invoiceHasPayments($id)) {
+        return redirect()
+            ->back()
+            ->with('error', 'Invoice has payment records. Delete payments first before deleting the invoice.');
+    }
+
     $redirectTarget = strtolower(trim($this->request->getGet('redirect') ?? ''));
 
-    // Invoice can be trashed even when payments were recorded.
-    // Payment records remain intact so they continue to appear in the payment receive screen.
+    // Invoice can be trashed once related payments are removed.
     $this->m->update($id, [
         'status'       => 'trashed',
         'trashed_at'   => date('Y-m-d H:i:s'),
@@ -434,10 +452,21 @@ public function restore($id)
 
 public function permanentDelete($id)
 {
-    $this->im->where('invoice_id', $id)->delete();
+    $invoice = $this->m->find($id);
 
-    // Do not delete payment records when an invoice is permanently deleted.
-    // Payments should remain visible in the payment receive screen for manual cleanup.
+    if (!$invoice) {
+        return redirect()
+            ->to(base_url('invoice/invoices'))
+            ->with('error', 'Invoice not found.');
+    }
+
+    if ($this->invoiceHasPayments($id)) {
+        return redirect()
+            ->back()
+            ->with('error', 'Invoice has payment records. Delete payments first before permanently deleting the invoice.');
+    }
+
+    $this->im->where('invoice_id', $id)->delete();
     $this->m->delete($id);
 
     $redirectTarget = strtolower(trim($this->request->getGet('redirect') ?? ''));
@@ -445,11 +474,11 @@ public function permanentDelete($id)
     if ($redirectTarget === 'invoiceindex') {
         return redirect()
             ->to(base_url('invoice/invoices'))
-            ->with('success', 'Invoice permanently deleted. Payments remain for manual removal.');
+            ->with('success', 'Invoice permanently deleted.');
     }
 
     return redirect()
         ->to(base_url('invoice/invoices/trash'))
-        ->with('success', 'Invoice permanently deleted. Payments remain for manual removal.');
+        ->with('success', 'Invoice permanently deleted.');
 }
 }

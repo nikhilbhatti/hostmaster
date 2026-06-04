@@ -26,7 +26,9 @@ function numToWordsINR($n) {
 }
 $total_words = numToWordsINR($inv['total']);
 $is_paid = strtolower($inv['status']) === 'paid';
-$is_locked = in_array(strtolower($inv['status']), ['paid', 'partial', 'partially_paid'], true);
+$is_locked = strtolower($inv['status']) === 'trashed';
+$latestPaymentId = isset($latestPaymentId) ? $latestPaymentId : null;
+$paymentCount = isset($paymentCount) ? $paymentCount : count($payments);
 ?>
 
 <style>
@@ -249,18 +251,6 @@ $is_locked = in_array(strtolower($inv['status']), ['paid', 'partial', 'partially
             <i class="bi bi-clock-history"></i> Payment History
         </a>
 
-        <?php if($is_locked): ?>
-            <!-- Partial/Paid: Edit disabled -->
-            <span class="btn-disabled">
-                <i class="bi bi-pencil"></i> Edit
-            </span>
-        <?php else: ?>
-            <a href="<?= base_url('invoice/invoices/edit/'.$inv['id']) ?>"
-               class="btn btn-outline">
-                <i class="bi bi-pencil"></i> Edit
-            </a>
-        <?php endif; ?>
-
         <div class="zdrop" id="pdfDrop">
             <button type="button"
                     class="btn btn-outline"
@@ -468,9 +458,9 @@ $is_locked = in_array(strtolower($inv['status']), ['paid', 'partial', 'partially
     </div>
 
     <?php if($is_paid): ?>
-    <div style="background:#fefce8;border:1px solid #fde68a;border-radius:6px;margin:12px 16px;padding:10px 14px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:8px;">
+    <div style="background:#fefce8;border:1px solid #fde68a;border-radius:6px;margin:12px 16px;padding:10px 14px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <i class="bi bi-lock-fill"></i>
-        <span>Invoice is fully paid. Edit and Delete actions are locked.</span>
+        <span>Invoice is fully paid. Edit and Delete actions are locked until payment records are removed from Payment Receive / Payment History.</span>
     </div>
     <?php endif; ?>
 
@@ -483,12 +473,15 @@ $is_locked = in_array(strtolower($inv['status']), ['paid', 'partial', 'partially
                     <th>Mode</th>
                     <th>Reference</th>
                     <th style="text-align:right;">Amount</th>
-                    <th>Action</th>
+                    <th style="text-align:right;">Balance</th>
                 </tr>
             </thead>
             <tbody>
             <?php if(!empty($payments)): ?>
+                <?php $runningPaid = 0; ?>
                 <?php foreach($payments as $p): ?>
+                    <?php $runningPaid += (float)($p['amount'] ?? 0); ?>
+                    <?php $runningBalance = max(0, (float)($inv['total'] ?? 0) - $runningPaid); ?>
                     <tr>
                         <td style="font-weight:600;color:#5065e8">
                             <?= esc($p['payment_number'] ?? '-') ?>
@@ -505,17 +498,8 @@ $is_locked = in_array(strtolower($inv['status']), ['paid', 'partial', 'partially
                         <td style="color:#16a34a;font-weight:600;text-align:right;">
                             ₹<?= number_format((float)($p['amount'] ?? 0), 2) ?>
                         </td>
-                        <td>
-                            <a href="<?= base_url('invoice/payments/edit/'.$p['id'] . '?source=invoice') ?>"
-                               style="color:#2563eb;font-weight:600;text-decoration:none;">
-                                Edit
-                            </a>
-                            &nbsp;|&nbsp;
-                            <a href="<?= base_url('invoice/payments/delete/'.$p['id'] . '?source=invoice') ?>"
-                               onclick="return confirm('Are you sure you want to delete this payment? Invoice balance will be updated.')"
-                               style="color:#dc2626;font-weight:600;text-decoration:none;">
-                                Delete
-                            </a>
+                        <td style="color:#111827;font-weight:600;text-align:right;">
+                            ₹<?= number_format($runningBalance, 2) ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

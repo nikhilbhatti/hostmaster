@@ -226,10 +226,10 @@ input[type="checkbox"]{
 
         <div id="bulkActions" class="payments-bulk-actions" style="display:none;">
             <div style="margin-right:16px; color:#b91c1c; font-weight:600; font-size:13px;">
-                Warning: Deleting selected payment records is permanent. Check partial payment invoices carefully before continuing.
+                Warning: This deletes payment records permanently and updates invoice balances. Delete payments here first, then delete invoices from the invoice screen.
             </div>
             <span id="bulkSelectedCount">0 selected</span>
-            <button type="submit" class="btn-delete-selected" onclick="return confirm('Warning: deleting selected payment records will permanently remove them. If invoices have partial payments, verify the amounts before continuing.')">
+            <button type="submit" class="btn-delete-selected" onclick="return confirm('Warning: deleting selected payment records is permanent. This will update invoice balances and remove payment history.')">
                 Delete Selected
             </button>
         </div>
@@ -293,7 +293,7 @@ input[type="checkbox"]{
                         }
                     ?>
 
-                    <?php $targetUrl = ($status === 'deleted') ? base_url('invoice/payments/history/' . $invoiceId) : base_url('invoice/invoices/show/' . $invoiceId); ?>
+                    <?php $targetUrl = base_url('invoice/payments/history/' . $invoiceId); ?>
                     <tr onclick="window.location.href='<?= $targetUrl ?>'">
 
                         <td class="checkbox-col"
