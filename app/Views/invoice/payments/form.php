@@ -66,6 +66,7 @@ $selectedInvoiceNumber = $invoice['invoice_number'] ?? '';
         <?= csrf_field() ?>
 
         <input type="hidden" name="invoice_id" id="invoice_id" value="<?= esc($selectedInvoiceId) ?>">
+        <input type="hidden" name="source" value="<?= esc($source ?? '') ?>">
 
         <div class="zoho-grid-row">
             <div class="zoho-label">Customer Name<span class="required">*</span></div>

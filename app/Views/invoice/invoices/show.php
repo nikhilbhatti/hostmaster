@@ -235,12 +235,22 @@ $paymentCount = isset($paymentCount) ? $paymentCount : count($payments);
     <div style="display:flex;gap:7px;align-items:center">
 
         <?php if($is_paid): ?>
+            <span class="btn-disabled">
+                <i class="bi bi-pencil-square"></i> Edit Invoice
+            </span>
+        <?php else: ?>
+            <a href="<?= base_url('invoice/invoices/edit/'.$inv['id']) ?>" class="btn btn-outline">
+                <i class="bi bi-pencil-square"></i> Edit Invoice
+            </a>
+        <?php endif; ?>
+
+        <?php if($is_paid): ?>
             <!-- PAID: Record Payment disabled -->
             <span class="btn-disabled">
                 <i class="bi bi-credit-card"></i> Record Payment
             </span>
         <?php else: ?>
-            <a href="<?= base_url('invoice/payments/create-for-invoice/'.$inv['id']) ?>"
+            <a href="<?= base_url('invoice/payments/create-for-invoice/'.$inv['id'].'?source=invoice') ?>"
                class="btn btn-success">
                 <i class="bi bi-credit-card"></i> Record Payment
             </a>

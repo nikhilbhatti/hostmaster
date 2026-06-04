@@ -266,7 +266,8 @@ class Payments extends BaseController
                 ->where('status', 1)
                 ->orderBy('display_name')
                 ->findAll(),
-            'invoice' => $inv
+            'invoice' => $inv,
+            'source' => strtolower(trim($this->request->getGet('source') ?? ''))
         ]);
     }
 
@@ -375,6 +376,12 @@ class Payments extends BaseController
                 ->back()
                 ->withInput()
                 ->with('error', 'Payment could not be recorded. Please enter amount or allocation.');
+        }
+
+        if ($this->request->getPost('source') === 'invoice' && !empty($inv_id)) {
+            return redirect()
+                ->to(base_url('invoice/invoices/show/' . $inv_id))
+                ->with('success', 'Payment ' . $pn . ' recorded successfully.');
         }
 
         return redirect()
