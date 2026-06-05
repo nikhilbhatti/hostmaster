@@ -33,6 +33,9 @@
 .table-wrap {
     width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
 }
 
 .modern-table {
@@ -182,6 +185,163 @@
     background: #e5e7eb;
     color: #374151;
 }
+
+/* RESPONSIVE FIX */
+@media (max-width: 992px) {
+    .custom-header-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .custom-header-wrapper h4 {
+        font-size: 20px;
+    }
+
+    .custom-header-wrapper > div {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .modern-card {
+        border-radius: 10px;
+    }
+
+    .modern-table {
+        min-width: 1050px;
+    }
+}
+
+@media (max-width: 768px) {
+    .custom-header-wrapper {
+        gap: 12px;
+    }
+
+    .custom-header-wrapper h4 {
+        font-size: 19px;
+        text-align: left;
+    }
+
+    .custom-header-wrapper > div {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    .custom-header-wrapper > div > a,
+    .custom-header-wrapper > div > div,
+    .custom-header-wrapper .btn {
+        width: 100%;
+    }
+
+    .custom-header-wrapper > div > div {
+        overflow-x: auto;
+        justify-content: flex-start;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .custom-header-wrapper > div > div .btn {
+        width: auto;
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    .modern-table {
+        min-width: 1000px;
+        font-size: 13px;
+    }
+
+    .modern-table th,
+    .modern-table td {
+        padding: 11px 12px;
+    }
+
+    .status-badge {
+        min-width: 64px;
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+
+    .action-badge-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    .modal-dialog {
+        margin: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    .custom-header-wrapper h4 {
+        font-size: 18px;
+    }
+
+    .modern-card {
+        border-radius: 8px;
+        margin-left: -2px;
+        margin-right: -2px;
+    }
+
+    .modern-table {
+        min-width: 950px;
+    }
+
+    .modern-table th {
+        font-size: 10.5px;
+        padding: 10px;
+    }
+
+    .modern-table td {
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    .action-badge-btn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .action-badge-btn svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .status-badge {
+        font-size: 10px;
+        padding: 4px 8px;
+        min-width: 58px;
+    }
+
+    .btn {
+        font-size: 13px;
+    }
+
+    .modal-content {
+        border-radius: 14px !important;
+    }
+}
+
+@media (max-width: 420px) {
+    .custom-header-wrapper {
+        margin-bottom: 14px;
+    }
+
+    .modern-table {
+        min-width: 900px;
+    }
+
+    .action-badge-btn {
+        width: 26px;
+        height: 26px;
+    }
+}
 </style>
 
 <div class="custom-header-wrapper">
@@ -189,8 +349,9 @@
 
     <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
         <a href="<?= base_url('invoice/invoices/trash') ?>" class="btn btn-warning">
-    🗑️ View Trash
-</a>
+            🗑️ View Trash
+        </a>
+
         <div style="display:flex; gap:6px; background:#f3f4f6; padding:4px; border-radius:8px;">
             <?php foreach(['' => 'All', 'draft' => 'Draft', 'sent' => 'Sent', 'partial' => 'Partial', 'paid' => 'Paid', 'overdue' => 'Overdue'] as $k => $v): ?>
                 <a href="<?= base_url('invoice/invoices' . ($k ? '?status=' . $k : '')) ?>"
@@ -198,7 +359,6 @@
                    style="border-radius:6px; font-weight:500; border:none; padding:6px 12px; font-size:13px; <?= ($status_filter ?? '') === $k ? '' : 'background:transparent; color:#4b5563;' ?>">
                     <?= esc($v) ?>
                 </a>
-                
             <?php endforeach; ?>
         </div>
 
@@ -287,7 +447,6 @@
 
                             <td>
                                 <div style="display:flex; gap:6px; justify-content:flex-end; padding-right:8px;">
-                                    <!-- View Button: Yeh hamesha dikhega -->
                                     <a href="<?= base_url('invoice/invoices/show/' . $inv['id']) ?>" class="action-badge-btn btn-view-custom" title="View">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -296,7 +455,6 @@
                                     </a>
 
                                     <?php if (!$isLockedInvoice): ?>
-                                        <!-- Edit Button -->
                                         <a href="<?= base_url('invoice/invoices/edit/' . $inv['id']) ?>" class="action-badge-btn btn-edit-custom" title="Edit">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M12 20h9"></path>
@@ -304,7 +462,6 @@
                                             </svg>
                                         </a>
                                     <?php else: ?>
-                                        <!-- Locked invoice (partial/paid): only edit disabled -->
                                         <span class="action-badge-btn btn-disabled-custom" title="Paid or partially paid invoices cannot be edited.">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -313,7 +470,6 @@
                                         </span>
                                     <?php endif; ?>
 
-                                    <!-- Delete Button -->
                                     <a href="javascript:void(0)" class="action-badge-btn btn-delete-custom" title="Choose trash or permanent delete" onclick="openDeleteChoice('<?= $inv['id'] ?>'); return false;">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                             <polyline points="3 6 5 6 21 6"></polyline>
@@ -324,7 +480,6 @@
                                     </a>
 
                                     <?php if ($statusKey !== 'paid'): ?>
-                                        <!-- Record Payment Button -->
                                         <a href="<?= base_url('invoice/payments/create-for-invoice/' . $inv['id']) ?>" class="action-badge-btn btn-pay-custom" title="Record Payment">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
@@ -352,9 +507,6 @@
     </div>
 </div>
 
-
-
-<!-- Delete Choice Modal -->
 <div class="modal fade" id="deleteChoiceModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow-lg" style="border-radius:18px; overflow:hidden;">
