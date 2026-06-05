@@ -18,34 +18,65 @@
             --bg-dark: #0f172a;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            width: 100%;
+            min-height: 100%;
+        }
+
         body { 
             background-color: #f8fafc;
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
                 radial-gradient(circle at 80% 70%, rgba(79, 70, 229, 0.08) 0%, transparent 40%);
-            height: 100vh; 
+            min-height: 100vh;
+            min-height: 100dvh;
             display: flex; 
             align-items: center; 
             justify-content: center; 
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            overflow: hidden;
+            padding: 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
-        /* Animated Background Shapes */
         .shape {
-            position: absolute;
+            position: fixed;
             filter: blur(80px);
             z-index: -1;
             border-radius: 50%;
             animation: float 20s infinite alternate;
         }
-        .shape-1 { width: 400px; height: 400px; background: rgba(99, 102, 241, 0.15); top: -100px; left: -100px; }
-        .shape-2 { width: 300px; height: 300px; background: rgba(129, 140, 248, 0.1); bottom: -50px; right: -50px; animation-delay: -5s; }
+
+        .shape-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(99, 102, 241, 0.15);
+            top: -100px;
+            left: -100px;
+        }
+
+        .shape-2 {
+            width: 300px;
+            height: 300px;
+            background: rgba(129, 140, 248, 0.1);
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -5s;
+        }
 
         @keyframes float {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 100px); }
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 100px);
+            }
         }
 
         .login-card { 
@@ -56,6 +87,7 @@
             box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.08); 
             background: rgba(255, 255, 255, 0.7); 
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 50px;
             transition: transform 0.3s ease;
         }
@@ -105,7 +137,7 @@
             background: rgba(255, 255, 255, 0.5); 
             border: 1.5px solid #e2e8f0; 
             border-radius: 16px;
-            padding: 14px 18px 14px 50px; 
+            padding: 14px 50px 14px 50px; 
             font-size: 0.95rem;
             font-weight: 500;
             color: #1e293b;
@@ -130,6 +162,12 @@
             transform: translateY(-50%);
             cursor: pointer;
             color: #94a3b8;
+            z-index: 5;
+        }
+
+        .password-toggle i {
+            position: static;
+            transform: none;
         }
 
         .btn-submit { 
@@ -147,6 +185,7 @@
 
         .btn-submit:hover { 
             background: var(--primary-dark); 
+            color: #fff;
             transform: translateY(-3px); 
             box-shadow: 0 20px 30px -10px rgba(79, 70, 229, 0.4);
         }
@@ -170,10 +209,129 @@
             color: #64748b;
         }
 
-        /* Dark Mode support toggle (Optional) */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                align-items: center;
+            }
+
+            .login-card {
+                max-width: 100%;
+                padding: 38px 28px;
+                border-radius: 26px;
+            }
+
+            .login-header h3 {
+                font-size: 1.65rem;
+            }
+
+            .brand-icon-wrapper {
+                width: 62px;
+                height: 62px;
+                border-radius: 18px;
+                margin-bottom: 20px;
+            }
+
+            .btn-submit {
+                padding: 14px;
+            }
+        }
+
         @media (max-width: 500px) {
-            .login-card { padding: 40px 25px; border-radius: 0; height: 100vh; max-width: 100%; border: none; background: #fff; }
-            .shape { display: none; }
+            body {
+                padding: 0;
+                background: #fff;
+                align-items: stretch;
+                justify-content: flex-start;
+            }
+
+            .login-card {
+                width: 100%;
+                max-width: 100%;
+                min-height: 100vh;
+                min-height: 100dvh;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+                background: #fff;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                padding: 30px 22px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .shape {
+                display: none;
+            }
+
+            .login-header h3 {
+                font-size: 1.5rem;
+            }
+
+            .login-header p {
+                margin-bottom: 32px !important;
+            }
+
+            .brand-icon-wrapper {
+                width: 58px;
+                height: 58px;
+                border-radius: 18px;
+                margin-bottom: 18px;
+            }
+
+            .input-box {
+                margin-bottom: 20px;
+            }
+
+            .form-control-custom {
+                font-size: 16px;
+                padding: 14px 50px 14px 50px;
+            }
+
+            .btn-submit {
+                height: 52px;
+                padding: 12px;
+                font-size: 15px;
+            }
+
+            .footer-links {
+                margin-top: 24px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .login-card {
+                padding: 25px 16px;
+            }
+
+            .login-header h3 {
+                font-size: 1.35rem;
+            }
+
+            .brand-icon-wrapper {
+                width: 54px;
+                height: 54px;
+            }
+
+            .form-control-custom {
+                padding-left: 46px;
+                padding-right: 46px;
+            }
+
+            .input-box i {
+                left: 16px;
+            }
+
+            .password-toggle {
+                right: 16px;
+            }
+
+            .d-flex.justify-content-between {
+                gap: 10px;
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
