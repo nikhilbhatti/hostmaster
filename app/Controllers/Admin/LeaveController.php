@@ -39,55 +39,63 @@ public function index() {
 public function autoSyncLeaves() {
     $db = \Config\Database::connect();
     
-    $today = date('Y-m-d');
-    $lastDayOfMonth = date('Y-m-t');
-
-    // Sirf mahine ke aakhri din hi logic chalega
-    if ($today !== $lastDayOfMonth) {
-        return "Not the last day of month. Skipping...";
-    }
-
+    // Aaj ka current mahina aur saal nikalenge
     $currentMonth = (int)date('m');
     $currentYear  = (int)date('Y');
 
-    // Saari allocations nikaalein
+    // Saari allocations nikaalein (Jo current year ke liye hain)
     $allocations = $db->table('staff_leave_allocation sla')
         ->select('sla.*, a.joining_date, a.employment_type')
         ->join('admins a', 'a.id = sla.user_id')
         ->where('sla.year', $currentYear)
         ->get()->getResultArray();
 
+    $updatedCount = 0;
+
     foreach ($allocations as $alc) {
-        // Double check: Is mahine pehle update toh nahi hua?
-        if ($alc['last_updated_month'] == $currentMonth) continue;
+        // ⚡ SMART CHECK: Agar is record ka 'last_updated_month' current month se chhota hai,
+        // iska matlab naya mahina lag chuka hai aur ise RESET ki zaroorat hai!
+        // Agar is mahine ka update ho chuka hai, toh simple skip (continue) karega.
+        if ((int)$alc['last_updated_month'] >= $currentMonth) {
+            continue; 
+        }
 
         $leaveType = $db->table('leave_types')->where('id', $alc['leave_type_id'])->get()->getRowArray();
+        
+        // Agar galti se koi leave type delete ho gaya ho database se, toh error se bachne ke liye safety check
+        if (!$leaveType) continue; 
+        
         $lName = strtolower($leaveType['leave_name']);
         $newLimit = $alc['leave_limit'];
 
-        // ❌ EARNED LEAVE LOGIC HATA DI
-        // Ab earned leave admin manually set karega
-
-        // ✅ SHORT/HALF LEAVE LOGIC - SAME RAKHA
+        // ✅ SHORT/HALF LEAVE LOGIC - AUTO RESET TO 1
         if (str_contains($lName, 'short') || str_contains($lName, 'half')) {
-            // Purani expire ho jayegi, naye mahine ke liye sirf 1 milegi
+            // Naye mahine mein direct '1' set hoga.
+            // Agar pichle mahine 0 bachi thi toh bhi 1 ho jayegi.
+            // Agar pichle mahine use nahi ki thi (1 bachi thi), toh bhi max 1 hi rahega (Carry forward nahi hogi).
             $newLimit = 1; 
+            
+            // Database Update sirf Short/Half leave ke liye trigger hoga
+            $db->table('staff_leave_allocation')
+               ->where('id', $alc['id'])
+               ->update([
+                    'leave_limit'        => $newLimit,
+                    'last_updated_month' => $currentMonth, // Ab is mahine ye dubara reset nahi hoga
+                    'updated_at'         => date('Y-m-d H:i:s')
+               ]);
+               
+            $updatedCount++;
         }
-        // NOTE: Sick/Casual/Earned leaves admin manual set karega
-
-        // Update DB
-        $db->table('staff_leave_allocation')
-           ->where('id', $alc['id'])
-           ->update([
-                'leave_limit'        => $newLimit,
-                'last_updated_month' => $currentMonth,
-                'updated_at'         => date('Y-m-d H:i:s')
-           ]);
     }
-    return "Sync Success for $lastDayOfMonth";
+    
+    return "Sync Check Completed. Total " . $updatedCount . " staff short/half leaves reset for Month: " . $currentMonth;
 }
 public function manageStaff() {
     $db = \Config\Database::connect();
+    
+    // 🔥 SUPER SYNC TRIGGER: Page khulte hi automatic saare staff ki 
+    // short leave aur half day check karke naye mahine ke liye 1 set kar dega.
+    $this->autoSyncLeaves(); 
     
     // 1. Database se staff data fetch karein (Humein naye columns bhi chahiye)
     $users = $db->table('admins')
