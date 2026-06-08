@@ -378,7 +378,7 @@ public function pendingLeaves() {
         ->orderBy('from_date', 'DESC')
         ->get()->getResultArray();
 
-    // 3. UPDATED: Card Summary (Ab sirf non-deleted records count honge)
+    // 3. Card Summary (Ab sirf non-deleted records count honge)
     $data['summary'] = [
         'approved' => $db->table('leave_requests')
                         ->where(['user_id' => $id, 'status' => 'approved', 'is_deleted_by_admin' => 0])
@@ -392,6 +392,8 @@ public function pendingLeaves() {
     ];
 
     $year = date('Y');
+    $currentMonth = date('m'); // 🟢 Naya variable aaj ka mahina nikalne ke liye
+
     $allocations = $db->table('staff_leave_allocation sla')
         ->select('sla.leave_limit, lt.leave_name, lt.id as type_id')
         ->join('leave_types lt', 'lt.id = sla.leave_type_id')
@@ -400,9 +402,10 @@ public function pendingLeaves() {
 
     $balanceData = [];
     foreach ($allocations as $alc) {
-        // 4. UPDATED: Balance calculation mein bhi check lagaya hai
-        // Taki deleted/hidden records used leaves mein count na ho
-        $used = $db->table('leave_requests')
+        $lName = strtolower($alc['leave_name']);
+
+        // Base Query Builder taiyar kiya
+        $usedBuilder = $db->table('leave_requests')
             ->select('SUM(CASE 
                         WHEN leave_duration = "half_day" THEN 0.5 
                         ELSE (DATEDIFF(to_date, from_date) + 1) 
@@ -411,9 +414,20 @@ public function pendingLeaves() {
                 'user_id' => $id, 
                 'leave_type_id' => $alc['type_id'], 
                 'status' => 'approved',
-                'is_deleted_by_admin' => 0 // Sirf visible leaves ka balance calculate karein
-            ])
-            ->get()->getRow();
+                'is_deleted_by_admin' => 0
+            ]);
+
+        // ✨ 🟢 Galti Yahan Thi Jo Ab Theek Ho Gayi Hai:
+        // Agar leave name mein 'short' ya 'half' aata hai, toh query ko usi mahine aur saal par restrict kar do
+        if (str_contains($lName, 'short') || str_contains($lName, 'half')) {
+            $usedBuilder->where('MONTH(from_date)', $currentMonth)
+                        ->where('YEAR(from_date)', $year);
+        } else {
+            // Baaki saari leaves (Sick, Casual, etc.) ke liye pure saal ka check chalega
+            $usedBuilder->where('YEAR(from_date)', $year);
+        }
+
+        $used = $usedBuilder->get()->getRow();
 
         $usedCount = floatval($used->total_used ?? 0);
         $totalLimit = floatval($alc['leave_limit']);
