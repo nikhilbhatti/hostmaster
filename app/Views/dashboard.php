@@ -224,7 +224,7 @@
 <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
     <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center" style="border-radius: 15px 15px 0 0;">
         <h6 class="mb-0 fw-bold text-primary">
-            <i class="fas fa-sync-alt me-2"></i> Recent Staff Leave Activity
+            <i class="fas fa-sync-alt me-2"></i> 
         </h6>
         <a href="<?= base_url('admin/leaves/requests') ?>" class="text-primary fw-bold small text-decoration-none">
             View All Requests <i class="fas fa-arrow-right ms-1"></i>

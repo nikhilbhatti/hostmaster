@@ -23,8 +23,10 @@ jobs:
           port: 21
           local-dir: ./
           server-dir: /domains/slysis.com/public_html/master/
-          state-name: ../.ftp-sync-state.json
+          state-name: .ftp-sync-state.json
           dangerous-clean-slate: false
+          timeout: 900000          # 🟢 FIX 1: Connection timeout ko badha diya taaki crash na ho
+          log-level: verbose       # 🟢 FIX 2: Agar koi file atke toh logs mein saaf dikhe
           exclude: |
             **/.git/**
             **/.git*
@@ -34,6 +36,9 @@ jobs:
             **/tests/**
             **/vendor/**
             **/system/**
-            **/writable/**
+            **/writable/cache/** # 🟢 FIX 3: Poora writable block nahi kiya, sirf cache, logs aur session ko roka hai
+            **/writable/logs/**
+            **/writable/session/**
+            **/writable/debugbar/**
             **/.env
             **/*.log
