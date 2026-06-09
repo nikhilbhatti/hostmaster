@@ -144,6 +144,7 @@ $hasLms = function($mod, $act = 'view') use ($lms_permissions, $user_role) {
                 </a>
             </li>
 
+            <?php if ($user_role == 'admin'): ?>
             <li class="nav-item">
                 <a class="nav-link d-flex align-items-center justify-content-between <?= (strpos(uri_string(), 'invoice') !== false) ? 'active' : 'collapsed' ?>" 
                    data-bs-toggle="collapse" href="#billingSystemCollapse" role="button"
@@ -166,6 +167,7 @@ $hasLms = function($mod, $act = 'view') use ($lms_permissions, $user_role) {
                     </div>
                 </div>
             </li>
+            <?php endif; ?>
 
             <?php if ($user_role !== 'admin'): ?>
             <li class="nav-item">

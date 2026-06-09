@@ -15,7 +15,7 @@
     <div class="row mb-4 align-items-center">
         <div class="col">
             <h3 class="fw-bold text-dark">My Leave Board</h3>
-            <p class="text-muted mb-0">Apna leave status aur balance yahan track karein.</p>
+            <p class="text-muted mb-0">Track your leave status and balance here..</p>
         </div>
     
     </div>
