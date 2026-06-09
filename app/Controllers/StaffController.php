@@ -12,7 +12,7 @@ class StaffController extends BaseController
      * Iska naam 'index' se badal kar 'leaveDashboard' kar diya hai
      * taaki ye CRM dashboard se mix na ho.
      */
-    public function leaveDashboard() 
+   public function leaveDashboard() 
 {
     $db = \Config\Database::connect();
     $userId = session()->get('user_id');
@@ -22,12 +22,13 @@ class StaffController extends BaseController
     }
 
     $year = date('Y');
+    $currentMonth = date('m'); // 🟢 Naya variable: Is chal rahe mahine ka filter lagane ke liye
 
     /**
-     * LEAVE BALANCE LOGIC (FULL & SECURE)
+     * LEAVE BALANCE LOGIC (FULL & SECURE - FIXED FOR MONTHLY RESET)
      * 1. COALESCE use kiya hai taaki agar allocation na ho toh NULL ki jagah 0 aaye.
      * 2. Used leaves mein Half-Day (0.5) ka accurate logic add kiya hai.
-     * 3. Left Join aur Subqueries ko optimize kiya hai taaki koi entry miss na ho.
+     * 3. ✨ MAGIC FIX: Short/Half leaves ke liye MONTH(from_date) check hoga, baaki ke liye YEAR check hoga.
      */
     $leaveBalances = $db->table('leave_types lt')
         ->select('lt.leave_name, lt.id as type_id')
@@ -36,13 +37,18 @@ class StaffController extends BaseController
         ->select("COALESCE((SELECT leave_limit FROM staff_leave_allocation 
                   WHERE user_id = $userId AND leave_type_id = lt.id AND year = $year), 0) as total_quota")
         
-        // Step 2: Approved Used Leaves fetch karein (Half-day logic ke saath)
+        // Step 2: Approved Used Leaves fetch karein (Dynamic Monthly/Yearly condition ke saath)
         ->select("COALESCE((SELECT SUM(CASE WHEN leave_duration = 'half_day' THEN 0.5 ELSE (DATEDIFF(to_date, from_date) + 1) END) 
                   FROM leave_requests 
                   WHERE user_id = $userId 
                   AND leave_type_id = lt.id 
                   AND status = 'approved' 
-                  AND YEAR(from_date) = $year), 0) as used_leaves")
+                  AND (
+                      ( (LOWER(lt.leave_name) LIKE '%short%' OR LOWER(lt.leave_name) LIKE '%half%') AND MONTH(from_date) = $currentMonth AND YEAR(from_date) = $year )
+                      OR 
+                      ( NOT (LOWER(lt.leave_name) LIKE '%short%' OR LOWER(lt.leave_name) LIKE '%half%') AND YEAR(from_date) = $year )
+                  )
+                 ), 0) as used_leaves")
         ->get()->getResultArray();
 
     /**
@@ -77,7 +83,6 @@ class StaffController extends BaseController
 
     return view('admin/staff/dashboard', $data);
 }
-
     // 2. Apply Leave Page
     // app/Controllers/StaffController.php mein is function ko update karein
 public function applyLeave() 
